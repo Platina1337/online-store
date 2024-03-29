@@ -1,0 +1,47 @@
+{% extends "blog/base.html" %}
+{% load static %}
+{% block css %}
+<!--<link rel = 'stylesheet' href="{% static 'blog/main.css' %}">-->
+{% endblock %}
+{% block content %}
+
+
+<div id="carouselExample" class="carousel slide">
+  <div class="carousel-inner">
+    <div class="carousel-item active">
+      <img src="{% static 'img/kitchen.png' %}" class="d-block w-100" alt="...">
+    </div>
+    <div class="carousel-item">
+      <img src="{% static 'img/msi.png' %}" class="d-block w-100" alt="...">
+    </div>
+    <div class="carousel-item">
+      <img src="{% static 'img/sell.png' %}" class="d-block w-100" alt="...">
+    </div>
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
+</div>
+<section class="main-content">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-4 .col-sm-6">sadfasdfawerf</div>
+    </div>
+  </div>
+</section>
+{% for a in appoints %}
+<div class="posts-container">
+  <div class="post">
+    <img src="path_to_image.jpg" alt="Изображение поста">
+    <h2><a href="{% url 'post-detail' pk=a.id %}">{{ a.title }}</a></h2>
+    <p class="price">{{ a.price }}</p>
+  </div>
+
+</div>
+{% endfor %}
+{% endblock content %}

@@ -1,0 +1,47 @@
+{% extends "blog/base.html" %}
+{% load static %}
+{% block css %}
+<link rel="stylesheet" href="{% static 'blog/registration.css' %}">
+{% endblock %}
+{% block content %}
+<form class="login-form" method="POST" action="{% url 'register' %}">
+  {% csrf_token %}
+  <p class="login-text">
+    <span class="fa-stack fa-lg">
+      <i class="fa fa-circle fa-stack-2x"></i>
+      <i class="fa fa-lock fa-stack-1x"></i>
+    </span>
+  </p>
+<input type="text" class="login-username" autofocus="true" required="true" placeholder="Username" id="username" name="username" />
+{% if form.Username.errors %}
+  <ul class="errorlist">
+    {% for error in form.Username.errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+<input type="email" class="login-username" autofocus="true" required="true" placeholder="Email" id="email" name="email" />
+  {% if form.Email.errors %}
+    <ul class="errorlist">
+      {% for error in form.Email.errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <input type="password" class="login-password" required="true" placeholder="Password" id="Password" name="password"/>
+  {% if form.Password.errors %}
+    <ul class="errorlist">
+      {% for error in form.Password.errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <input type="submit" name="Login" value="Registration" class="login-submit" />
+</form>
+
+<a href="{% url 'login' %}" class="login-forgot-pass">Уже зарегистрированы?</a>
+<div class="underlay-photo"></div>
+<div class="underlay-black"></div>
+{% endblock content %}
