@@ -16,19 +16,31 @@
 						<a class="nav-link" href="{% url 'main:index' %}">Home</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href="#">Catalog</a>
+						<a class="nav-link" href="#Catalog">Catalog</a>
 					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="#">News</a>
+					<li class="nav-item" >
+						<a class="nav-link" href="#News">News</a>
 					</li>
 				</ul>
 				<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"><i class="far fa-user"></i></a>
 						<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-							<li><a class="dropdown-item" href="{% url 'main:register' %}">{{user.username}}</a></li>
-							<li><a class="dropdown-item" href="{% url 'main:login' %}">Авторизация</a></li>
-							<li><a class="dropdown-item" href="{% url 'main:register' %}">Регистрация</a></li>
+							{% if user.is_authenticated %}
+								{% if user.is_superuser %}
+									<!-- Суперпользователь -->
+									<li><a class="dropdown-item" href="{% url 'admin:login' %}">{{ user.username }}</a></li>
+								{% else %}
+									<!-- Обычный пользователь -->
+									<li><a class="dropdown-item" href="#">{{ user.username }}</a></li>
+								{% endif %}
+								<!-- Кнопка выхода -->
+								<li><a class="dropdown-item" href="{% url 'main:logout' %}">Выйти</a></li>
+							{% else %}
+								<!-- Незарегистрированный пользователь -->
+								<li><a class="dropdown-item" href="{% url 'main:login' %}">Авторизация</a></li>
+								<li><a class="dropdown-item" href="{% url 'main:register' %}">Регистрация</a></li>
+							{% endif %}
 						</ul>
 					</li>
 					<li class="nav-item">
@@ -90,15 +102,45 @@
                   <h2>{{ product.title }}</h2>
                   <p>{{ product.description }}</p>
                   <p class="price">${{ product.price }}</p>
+                  <!-- Форма для добавления продукта в корзину -->
                   <form id="cart-form" action="{% url 'cart:cart_add' product.id %}" method="post">
                      {% csrf_token %}
                      {{ cart_product_form }}
-                     <a href="#" onclick="document.getElementById('cart-form').submit(); return false;">
-                        <i class="fas fa-shopping-cart"></i>
-                     </a>
+                     <button type="submit" class="btn btn-dark"> <!-- Изменен класс на btn-dark -->
+                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                     </button>
                   </form>
                </div>
             </div>
+         </div>
+
+         <!-- Форма для добавления отзыва -->
+         <div class="mt-4">
+            <h3>Add a Review</h3>
+            <form method="post" action="{% url 'main:post-detail' product.id product.slug %}">
+               {% csrf_token %}
+               {{ review_form.as_p }}
+               <button type="submit" class="btn btn-dark"> <!-- Изменен класс на btn-dark -->
+                  Submit Review
+               </button>
+            </form>
+         </div>
+
+         <!-- Отображение существующих отзывов -->
+         <div class="mt-4">
+            <h3>Reviews</h3>
+            {% if product.reviews.count > 0 %}
+               <ul class="list-unstyled">
+                  {% for review in product.reviews.all %}
+                     <li>
+                        <strong>{{ review.author.username }}</strong> - {{ review.created_at|date:"F d, Y" }}
+                        <p>{{ review.content }}</p>
+                     </li>
+                  {% endfor %}
+               </ul>
+            {% else %}
+               <p>No reviews yet.</p>
+            {% endif %}
          </div>
       </div>
    </div>

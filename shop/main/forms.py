@@ -22,5 +22,11 @@ class RegistrationForm(forms.Form):
             raise forms.ValidationError('This username is already taken.')
         return username
 
-# 6tn47mrmxx76i9ooh4mbb8uwezrufedg34xk9kxo
+from django import forms
+from .models import Review
+
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ['content']
 

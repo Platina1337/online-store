@@ -47,3 +47,15 @@ class Profile(models.Model):
             output_size = (300, 300)
             img.thumbnail(output_size)
             img.save(self.image.path)
+
+from django.db import models
+from django.contrib.auth.models import User
+
+class Review(models.Model):
+    post = models.ForeignKey(BuildingMaterials, on_delete=models.CASCADE, related_name='reviews')
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Review by {self.author.username} on {self.post.title}'

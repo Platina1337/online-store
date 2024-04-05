@@ -8,19 +8,41 @@ from typing import Any
 
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, DetailView
-from .models import BuildingMaterials
+from .models import BuildingMaterials, Review
 from django.views.decorators.http import require_POST
 from cart.forms import CartAddProductForm
 
 def product_detail(request, id, slug):
-
-    product = get_object_or_404(BuildingMaterials,
-                                id=id,
-                                slug=slug,
-                                available=True)
+    # Получаем продукт (пост) по id и slug
+    product = get_object_or_404(BuildingMaterials, id=id, slug=slug, available=True)
+    reviews = Review.objects.filter(post=product)
+    # Форма для добавления продукта в корзину
     cart_product_form = CartAddProductForm()
-    return render(request, 'blog/post_detail.html', {'product': product,
-                                                        'cart_product_form': cart_product_form})
+
+    # Проверяем метод запроса
+    if request.method == 'POST':
+        if request.user.is_authenticated:
+            review_form = ReviewForm(request.POST)
+            if review_form.is_valid():
+                # Создаем объект отзыва, связываем с продуктом и текущим пользователем
+                review = review_form.save(commit=False)
+                review.post = product
+                review.author = request.user  # Устанавливаем текущего пользователя как автора отзыва
+                review.save()
+                # Опциональное сообщение об успешном добавлении отзыва
+                # Можно добавить сообщение об успешном добавлении отзыва
+                return redirect('main:post-detail', id=id, slug=slug)  # Перенаправляем обратно на страницу продукта
+
+    else:
+        review_form = ReviewForm()
+
+    # Отображаем шаблон с информацией о продукте, формой для корзины и формой для отзыва
+    return render(request, 'blog/post_detail.html', {
+        'product': product,
+        'cart_product_form': cart_product_form,
+        'review_form': review_form,
+        'reviews': reviews  # Передаем список отзывов в контекст шаблона
+    })
 
 
 
@@ -138,8 +160,11 @@ class ViewIndex(ListView):
         context['post'] = page_objects
         return context
 
+
 from django.shortcuts import render, redirect
-from .forms import RegistrationForm
+from .forms import RegistrationForm, ReviewForm
+
+
 # Create your views here.
 
 
