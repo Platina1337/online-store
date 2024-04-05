@@ -4,7 +4,7 @@
 <link rel = 'stylesheet' href="{% static 'blog/registration.css' %}">
 {% endblock %}
 {% block content %}
-<form method="post" action="{% url 'login' %}" class="login-form">
+<form method="post" action="{% url 'main:login' %}" class="login-form">
   {% csrf_token %}
   <p class="login-text">
     <span class="fa-stack fa-lg">
@@ -30,7 +30,7 @@
   {% endif %}
   <input type="submit" name="Login" value="Login" class="login-submit" />
 </form>
-<a href="#" class="login-forgot-pass">forgot password?</a>
+<a href="{% url 'main:register' %}" class="login-forgot-pass">Вы не зарегистрировались? </a>
 <div class="underlay-photo"></div>
 <div class="underlay-black"></div>
 {% endblock content %}

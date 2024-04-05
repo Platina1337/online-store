@@ -1,75 +1,144 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.shortcuts import render, get_object_or_404
+from django.core.paginator import Paginator
+from django.shortcuts import get_object_or_404
+from django.template.loader import render_to_string
 from django.views import View
 from typing import Any
-from django.views.generic import ListView, DetailView, TemplateView, CreateView
-from .models import Profile, BuildingMaterials
-from decimal import Decimal
-from django.conf import settings
-from django.views.decorators.http import require_POST
-from .forms import CartAddProductForm
-from .cart import Cart
 
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import ListView, DetailView
+from .models import BuildingMaterials
+from django.views.decorators.http import require_POST
+from cart.forms import CartAddProductForm
+
+def product_detail(request, id, slug):
+
+    product = get_object_or_404(BuildingMaterials,
+                                id=id,
+                                slug=slug,
+                                available=True)
+    cart_product_form = CartAddProductForm()
+    return render(request, 'blog/post_detail.html', {'product': product,
+                                                        'cart_product_form': cart_product_form})
+
+
+
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import requests
+
+from django.shortcuts import redirect
+
+
+import requests
+from django.http import JsonResponse
+
+import requests
+
+
+
+
+from rest_framework.decorators import api_view
+
+@api_view(['POST'])
+def import_contacts_and_send_email(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+
+        # Параметры для добавления в список Unisender
+        api_key = '6tn47mrmxx76i9ooh4mbb8uwezrufedg34xk9kxo'
+        list_id = '1'  # ID вашего списка в Unisender
+
+        # Добавляем контакт в список Unisender
+        import_url = f'https://api.unisender.com/ru/api/importContacts?format=json&api_key={api_key}&field_names[0]=email&field_names[1]=email_list_ids&data[0][0]={email}&data[0][1]={list_id}'
+        import_response = requests.post(import_url)
+
+        if import_response.status_code == 200:
+            import_data = import_response.json()
+            if 'error' in import_data:
+                return JsonResponse({"error": "Произошла ошибка при добавлении контакта: " + import_data['error']},
+                                    status=400)
+
+            # Контакт успешно добавлен, отправляем ему письмо
+            send_email_url = 'https://api.unisender.com/ru/api/sendEmail'
+            send_email_payload = {
+                'api_key': api_key,
+                'sender_name': 'Гоген Солнцев',
+                'sender_email': 'bbd3372005@gmail.com',
+                'subject': 'СКИДКИ 10000%, ВСЕ БЕСПЛАТНО!!!',
+                'body': '<html><body><h1>СКИДОК НЕТ ЛОШОК</h1></body></html>',
+                'list_id': list_id,
+                'email': email
+            }
+            send_email_response = requests.post(send_email_url, data=send_email_payload)
+
+            if send_email_response.status_code == 200:
+                send_email_data = send_email_response.json()
+                if 'error' in send_email_data:
+                    return JsonResponse({"error": "Произошла ошибка при отправке письма: " + send_email_data['error']},
+                                        status=400)
+                return redirect('main:index')  # Перенаправление на страницу успеха
+            else:
+                return JsonResponse({"error": "Ошибка при отправке письма."}, status=send_email_response.status_code)
+        else:
+            return JsonResponse({"error": "Произошла ошибка при добавлении контакта."},
+                                status=import_response.status_code)
+    else:
+        return JsonResponse({"error": "Метод не поддерживается."}, status=405)
+
+
+
+def logout_user(reqest):
+    logout(reqest)
+    return redirect('main:index')
 # Create your views here.
+from django.http import HttpResponseForbidden
+
+def csrf_failure(request, reason=""):
+    # Ваша логика обработки ошибки CSRF
+    return HttpResponseForbidden('CSRF verification failed. Please try again.')
+
 
 class ViewHome(ListView):
     model = BuildingMaterials
+
     template_name = 'blog/home.html'
     context_object_name = 'appoints'
 
 
 
 
-class PostDetailView(DetailView):
-    model = BuildingMaterials
-    context_object_name = 'post'
-    fields = ['title', 'content', 'image', 'price']
-    template_name = 'blog/post_detail.html'
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context_data = super().get_context_data(**kwargs)
-        post_object = self.get_object()
-        user = self.request.user
-
-        context_data[self.context_object_name] = post_object
-        return context_data
 
 class ViewIndex(ListView):
     model = BuildingMaterials
     context_object_name = 'post'
     fields = ['title', 'content', 'image', 'price']
     template_name = 'blog/index.html'
+    paginate_by = 9
 
+    def get_queryset(self):
+        # Получаем queryset всех объектов BuildingMaterials
+        queryset = super().get_queryset()
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        cart = Cart(self.request)
-        context['cart'] = cart
+        # Получаем объекты для текущей страницы с помощью пагинатора
+        page_objects = context['post']
+        paginator = Paginator(page_objects, self.paginate_by)
+
+        # Получаем номер текущей страницы из GET-параметра 'page'
+        page_number = self.request.GET.get('page')
+        page_objects = paginator.get_page(page_number)
+
+        # Обновляем контекст данных для передачи объектов текущей страницы
+        context['post'] = page_objects
         return context
 
-@require_POST
-def cart_add(request, product_id):
-    cart = Cart(request)
-    product = get_object_or_404(BuildingMaterials, id=product_id)
-    form = CartAddProductForm(request.POST)
-    if form.is_valid():
-        cd = form.cleaned_data
-        cart.add(BuildingMaterials=product,
-                 quantity=cd['quantity'],
-                 update_quantity=cd['update'])
-    return redirect('index')
-
-def cart_remove(request, product_id):
-    cart = Cart(request)
-    product = get_object_or_404(BuildingMaterials, id=product_id)
-    cart.remove(product)
-    return redirect('index')
-
-
-
 from django.shortcuts import render, redirect
-from django.contrib import messages
 from .forms import RegistrationForm
 # Create your views here.
 
@@ -99,7 +168,7 @@ class RegistrationView(View):
             # Сохранение пользователя в базе данных
             user.save()
 
-            return redirect('login')  # Перенаправление на страницу с успехом
+            return redirect('main:login')  # Перенаправление на страницу с успехом
         else:
             print('Form is invalid')
             print(form.errors)
@@ -113,7 +182,7 @@ def user_login(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('index')  # Замените 'index' на имя вашего URL-шаблона
+            return redirect('main:index')  # Замените 'index' на имя вашего URL-шаблона
 
         # Обработка неверных учетных данных
         error_message = 'Invalid username or password'

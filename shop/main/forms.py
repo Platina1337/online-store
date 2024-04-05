@@ -4,7 +4,7 @@ from django import forms
 class AddPostModel(forms.ModelForm):
     class Meta:
         model = BuildingMaterials
-        fields = ['title', 'description', 'image', 'pdf', 'price']
+        fields = ['title', 'description', 'image', 'price']
 
 from django import forms
 from django.contrib.auth.models import User
@@ -22,9 +22,5 @@ class RegistrationForm(forms.Form):
             raise forms.ValidationError('This username is already taken.')
         return username
 
-
-PRODUCT_QUANTITY_CHOICES = [(i, str(i)) for i in range(1, 21)]
-class CartAddProductForm(forms.Form):
-    quantity = forms.TypedChoiceField(choices=PRODUCT_QUANTITY_CHOICES, coerce=int)
-    update = forms.BooleanField(required=False, initial=False, widget=forms.HiddenInput)
+# 6tn47mrmxx76i9ooh4mbb8uwezrufedg34xk9kxo
 

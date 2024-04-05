@@ -1,6 +1,7 @@
 from decimal import Decimal
 from django.conf import settings
-from .models import Profile, BuildingMaterials
+from main.models import BuildingMaterials
+
 
 class Cart(object):
 

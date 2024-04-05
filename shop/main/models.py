@@ -1,6 +1,8 @@
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.contrib.auth.models import User
+from django.urls import reverse
+from django.utils.text import slugify
 # Create your models here.
 
 
@@ -9,12 +11,21 @@ class BuildingMaterials(models.Model):
     title = models.CharField(max_length=128, null=True, verbose_name='Название материала')
     description = models.TextField(max_length=256, null=True, verbose_name='Описание материала')
     image = models.ImageField(default='chto.png', upload_to='profile_pics')
-    pdf = models.FileField(validators=[FileExtensionValidator(['pdf'])], null=True, upload_to="luckych/uploads")
     price = models.IntegerField(null=True, default=0, verbose_name='Цена')
+    slug = models.SlugField(unique=True, null=True)  # Добавление поля slug
+    available = models.BooleanField(default=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)  # Создание slug на основе заголовка, замените на нужное поле
+        super().save(*args, **kwargs)
+
+
+    def get_absolute_url(self):
+        return reverse('main:post-detail', args=[self.id, self.slug])
 
     def __str__(self):
         return self.title
-
 
 from PIL import Image
 

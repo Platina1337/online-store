@@ -143,4 +143,102 @@ a:hover {
 	margin-left: 10px;
 }
 
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
 
+footer {
+    background-color: #333;
+    color: #fff;
+    padding: 20px 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+}
+
+.footer-content {
+    margin: 0 20px;
+}
+
+.footer-content h3 {
+    margin-bottom: 10px;
+}
+
+.footer-content p {
+    margin: 5px 0;
+}
+
+.footer-content ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.footer-content ul li {
+    margin-bottom: 5px;
+}
+
+.footer-content ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.footer-content ul li a:hover {
+    text-decoration: underline;
+}
+
+.footer-content form input[type="email"] {
+    width: 200px;
+    padding: 5px;
+    margin-bottom: 5px;
+}
+
+.footer-content form button {
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.footer-content form button:hover {
+    background-color: #45a049;
+}
+
+
+.toastPlacement {
+    right: 0; /* Позиционирование справа */
+    bottom: 0; /* Позиционирование снизу */
+}
+.toast-body {
+    color: black; /* Цвет текста в теле тоста */
+}
+
+/* Стили для кнопок пагинации */
+.pagination .page-link {
+    color: black; /* Цвет текста кнопки */
+    background-color: white; /* Фон кнопки */
+    border: 1px solid black; /* Граница кнопки */
+}
+
+.pagination .page-link:hover {
+    color: white; /* Цвет текста при наведении на кнопку */
+    background-color: black; /* Фон при наведении */
+    border-color: black; /* Цвет границы при наведении */
+}
+
+.pagination .page-item.active .page-link {
+    color: white; /* Цвет текста активной кнопки */
+    background-color: black; /* Фон активной кнопки */
+    border-color: black; /* Граница активной кнопки */
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Минимальная высота всего документа равная высоте видимой области браузера */
+}
+
+footer {
+    margin-top: auto; /* Отступ сверху футера должен быть "авто", чтобы он занимал оставшееся место внизу */
+}

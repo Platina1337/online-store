@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="{% static 'blog/registration.css' %}">
 {% endblock %}
 {% block content %}
-<form class="login-form" method="POST" action="{% url 'register' %}">
+<form class="login-form" method="POST" action="{% url 'main:register' %}">
   {% csrf_token %}
   <p class="login-text">
     <span class="fa-stack fa-lg">
@@ -41,7 +41,7 @@
   <input type="submit" name="Login" value="Registration" class="login-submit" />
 </form>
 
-<a href="{% url 'login' %}" class="login-forgot-pass">Уже зарегистрированы?</a>
+<a href="{% url 'main:login' %}" class="login-forgot-pass">Уже зарегистрированы?</a>
 <div class="underlay-photo"></div>
 <div class="underlay-black"></div>
 {% endblock content %}

@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
-
+    'shop',
+    'cart',
 
 
 ]
@@ -131,5 +132,6 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CART_SESSION_ID = 'cart'
+CSRF_FAILURE_VIEW = 'main.views.csrf_failure'  # Замените 'my_app.views.csrf_failure' на путь к вашему представлению обработки ошибок CSRF
 
 
