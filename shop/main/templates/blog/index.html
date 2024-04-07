@@ -1,196 +1,194 @@
 {% extends "blog/base.html" %}
 {% load static %}
 {% block css %}
-	<link rel="stylesheet" href="{% static 'blog/main.css' %}">
+    <link rel="stylesheet" href="{% static 'blog/main.css' %}">
 {% endblock %}
 {% block content %}
 
-		<nav class="navbar navbar-expand-lg navbar-light">
-		<div class="container-fluid">
-			<a class="navbar-brand" href="{% url 'main:index' %}">Stroev-Home</a>
-			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbarSupportedContent">
-				<ul class="navbar-nav me-auto mb-2 mb-lg-0 top-menu">
-					<li class="nav-item">
-						<a class="nav-link" href="{% url 'main:index' %}">Home</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="#Catalog">Catalog</a>
-					</li>
-					<li class="nav-item" >
-						<a class="nav-link" href="#News">News</a>
-					</li>
-				</ul>
-				<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"><i class="far fa-user"></i></a>
-						<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-							{% if user.is_authenticated %}
-								{% if user.is_superuser %}
-									<!-- Суперпользователь -->
-									<li><a class="dropdown-item" href="{% url 'admin:login' %}">{{ user.username }}</a></li>
-								{% else %}
-									<!-- Обычный пользователь -->
-									<li><a class="dropdown-item" href="#">{{ user.username }}</a></li>
-								{% endif %}
-								<!-- Кнопка выхода -->
-								<li><a class="dropdown-item" href="{% url 'main:logout' %}">Выйти</a></li>
-							{% else %}
-								<!-- Незарегистрированный пользователь -->
-								<li><a class="dropdown-item" href="{% url 'main:login' %}">Авторизация</a></li>
-								<li><a class="dropdown-item" href="{% url 'main:register' %}">Регистрация</a></li>
-							{% endif %}
-						</ul>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="{% url 'main:home' %}" data-bs-toggle="modal" data-bs-target="#modal-cart">
-							<i class="fas fa-shopping-cart"></i>
-						</a>
-						<div class="modal fade" id="modal-cart" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-							<div class="modal-dialog modal-xl">
-								<div class="modal-content">
-									<div class="modal-header bg-secondary text-white">
-										<h5 class="modal-title" id="exampleModalLabel">Корзина</h5>
-										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-									</div>
-									<div class="modal-body">
-										<table class="table">
-											{% for item in cart %}
-											  {% with product=item.product %}
-											<tbody>
-												<tr>
-													<a href="{{ product.get_absolute_url }}"><td>
-														<img src="{% if product.image %}
-                                    						{{ product.image.url }}
-                                								{% else %}
-                                    						{% static 'img/img.png' %}
-                                								{% endif %}" alt=""></td></a>
-													<td><a href="#">{{ product.title }}</a></td>
-													<td>{{ item.price }}</td>
-													<td>1</td>
-												</tr>
-											</tbody>
-											  {% endwith %}
-											{% endfor %}
-										</table>
-									</div>
-									<div class="modal-footer">
-										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-										<button type="button" class="btn btn-primary">Save changes</button>
-									</div>
-								</div>
-							</div>
-						</div>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="#"><i class="fas fa-search"></i></a>
-					</li>
-				</ul>
-			</div>
-		</div>
-	</nav>
-	<div class="container-fluid my-carousel">
-		<div id="carouselExampleIndicators" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
-			<div class="carousel-indicators">
-				<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-				<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-				<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
-			</div>
-			<div class="carousel-inner">
-				<div class="carousel-item active">
-					<img src="{% static 'img/2.jpg' %}" class="d-block w-100" alt="...">
-				</div>
-				<div class="carousel-item">
-					<img src="{% static 'img/2.jpg' %}" class="d-block w-100" alt="...">
-				</div>
-				<div class="carousel-item">
-					<img src="{% static 'img/3.jpeg' %}" class="d-block w-100" alt="...">
-				</div>
-			</div>
-			<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-				<span class="carousel-control-prev-icon" aria-hidden="true"></span>
-				<span class="visually-hidden">Previous</span>
-			</button>
-			<button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-				<span class="carousel-control-next-icon" aria-hidden="true"></span>
-				<span class="visually-hidden">Next</span>
-			</button>
-		</div>
-	</div>
-	<section class="main-content">
-    <div class="container" id="Catalog">
-        {% for material in post %}
-            {% if forloop.first or forloop.counter0|divisibleby:3 %}
-                <div class="row">
-            {% endif %}
-
-            <div class="col-lg-4 col-sm-6 mb-3">
-                <div class="product-card">
-                    <div class="product-thumb">
-                        <a href="{{ material.get_absolute_url }}">
-                            <img src="{{ material.image.url }}" alt="">
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'main:index' %}">Stroev-Home</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 top-menu">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'main:index' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#Catalog">Catalog</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#News">News</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"><i class="far fa-user"></i></a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            {% if user.is_authenticated %}
+                                {% if user.is_superuser %}
+                                    <!-- Суперпользователь -->
+                                    <li><a class="dropdown-item" href="{% url 'admin:login' %}">{{ user.username }}</a></li>
+                                {% else %}
+                                    <!-- Обычный пользователь -->
+                                    <li><a class="dropdown-item" href="#">{{ user.username }}</a></li>
+                                {% endif %}
+                                <!-- Кнопка выхода -->
+                                <li><a class="dropdown-item" href="{% url 'main:logout' %}">Выйти</a></li>
+                            {% else %}
+                                <!-- Незарегистрированный пользователь -->
+                                <li><a class="dropdown-item" href="{% url 'main:login' %}">Авторизация</a></li>
+                                <li><a class="dropdown-item" href="{% url 'main:register' %}">Регистрация</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'main:home' %}" data-bs-toggle="modal" data-bs-target="#modal-cart">
+                            <i class="fas fa-shopping-cart"></i>
                         </a>
-                    </div>
-                    <div class="product-details">
-                        <h4><a href="{{ material.get_absolute_url }}">{{ material.title }}</a></h4>
-                        <p>{{ material.description }}</p>
-                        <div class="product-bottom-details d-flex justify-content-between">
-                            <div class="product-price">
-                                {{ material.price }}
+                        <div class="modal fade" id="modal-cart" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-xl">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-secondary text-white">
+                                        <h5 class="modal-title" id="exampleModalLabel">Корзина</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <table class="table">
+                                            {% for item in cart %}
+                                                {% with product=item.product %}
+                                                    <tbody>
+                                                        <tr>
+                                                            <a href="{{ product.get_absolute_url }}"><td>
+                                                                <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'img/img.png' %}{% endif %}" alt="">
+                                                            </td></a>
+                                                            <td><a href="#">{{ product.title }}</a></td>
+                                                            <td>{{ item.price }}</td>
+                                                            <td>1</td>
+                                                        </tr>
+                                                    </tbody>
+                                                {% endwith %}
+                                            {% endfor %}
+                                        </table>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-primary">Save changes</button>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="product-links">
-                                <a href="#"><i class="far fa-heart"></i></a>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-search"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid my-carousel">
+        <div id="carouselExampleIndicators" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            </div>
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="{% static 'img/2.jpg' %}" class="d-block w-100" alt="...">
+                </div>
+                <div class="carousel-item">
+                    <img src="{% static 'img/2.jpg' %}" class="d-block w-100" alt="...">
+                </div>
+                <div class="carousel-item">
+                    <img src="{% static 'img/3.jpeg' %}" class="d-block w-100" alt="...">
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </div>
+    <section class="main-content">
+        <div class="container" id="Catalog">
+            {% for material in post %}
+                {% if forloop.first or forloop.counter0|divisibleby:3 %}
+                    <div class="row">
+                {% endif %}
+
+                <div class="col-lg-4 col-sm-6 mb-3">
+                    <div class="product-card">
+                        <div class="product-thumb">
+                            <a href="{{ material.get_absolute_url }}">
+								<img src="{{ material.image.url }}" alt="" class="img-fluid rounded" style="max-width: 200px; max-height: 150px; object-fit: cover;">
+                            </a>
+                        </div>
+                        <div class="product-details">
+                            <h4><a href="{{ material.get_absolute_url }}">{{ material.title }}</a></h4>
+                            <p>{{ material.description }}</p>
+                            <div class="product-bottom-details d-flex justify-content-between">
+                                <div class="product-price">
+                                    {{ material.price }}
+                                </div>
+                                <div class="product-links">
+                                    <a href="#"><i class="far fa-heart"></i></a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {% if forloop.last or forloop.counter|divisibleby:3 %}
-                </div>
+                {% if forloop.last or forloop.counter|divisibleby:3 %}
+                    </div>
+                {% endif %}
+            {% empty %}
+                <p>No materials found.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    {% if is_paginated %}
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
             {% endif %}
-        {% empty %}
-            <p>No materials found.</p>
-        {% endfor %}
-	</section>
-		{% if is_paginated %}
-            <ul class="pagination justify-content-center">
-                {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page=1">First</a>
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
                     </li>
+                {% else %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
                     </li>
                 {% endif %}
+            {% endfor %}
 
-                {% for num in page_obj.paginator.page_range %}
-                    {% if page_obj.number == num %}
-                        <li class="page-item active">
-                            <span class="page-link">{{ num }}</span>
-                        </li>
-                    {% else %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                        </li>
-                    {% endif %}
-                {% endfor %}
-
-                {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
-                    </li>
-                {% endif %}
-            </ul>
-        {% endif %}
-    </div>
-
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                </li>
+            {% endif %}
+        </ul>
+    {% endif %}
 {% endblock content %}
+
 {% block footer %}
     <footer>
         <div class="footer-content" id="News">
@@ -201,66 +199,35 @@
         </div>
         <div class="footer-content">
             <h3>Ссылки</h3>
-				<ul>
-					<li><a href="{% url 'main:index' %}">Главная</a></li>
-					<li><a href="#">О нас</a></li>
-					<li><a href="#">Контакты</a></li>
-					<li><a href="#">Услуги</a></li>
-				</ul>
+            <ul>
+                <li><a href="{% url 'main:index' %}">Главная</a></li>
+                <li><a href="#">О нас</a></li>
+                <li><a href="#">Контакты</a></li>
+                <li><a href="#">Услуги</a></li>
+            </ul>
         </div>
-        	<div class="footer-content">
-    	<h3>Подписка на новости</h3>
-    <form id="subscriptionForm" method="post" action="{% url 'main:import_contacts_and_send_email' %}">
-    {% csrf_token %}
-    <input type="email" id="emailInput" name="email" placeholder="Введите ваш email" required>
-    <button type="submit">Подписаться</button>
-</form>
+        <div class="footer-content">
+            <h3>Подписка на новости</h3>
+            <form id="subscriptionForm" method="post" action="{% url 'main:import_contacts_and_send_email' %}">
+                {% csrf_token %}
+                <input type="email" id="emailInput" name="email" placeholder="Введите ваш email" required>
+                <button type="submit">Подписаться</button>
+            </form>
 
-<div aria-live="polite" aria-atomic="true" class="bg-dark position-relative bd-example-toasts">
-    <div class="toast-container position-absolute p-3 bottom-0 end-0" id="toastPlacement">
-        <div class="toast" data-autohide="false">
-            <div class="toast-header">
-                <strong class="me-auto">Уведомление</strong>
-                <small>Только что</small>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-                Вы успешно подписались на обновления по почте.
+            <div aria-live="polite" aria-atomic="true" class="bg-dark position-relative bd-example-toasts">
+                <div class="toast-container position-absolute p-3 bottom-0 end-0" id="toastPlacement">
+                    <div class="toast" data-autohide="false">
+                        <div class="toast-header">
+                            <strong class="me-auto">Уведомление</strong>
+                            <small>Только что</small>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body">
+                            Вы успешно подписались на обновления по почте.
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
-
-<!-- Подключение jQuery и Bootstrap JS -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.bundle.min.js"></script>
-
-<script>
-$(document).ready(function () {
-    $('#subscriptionForm').submit(function(e) {
-        e.preventDefault(); // Предотвращаем стандартную отправку формы
-
-        const form = $(this);
-        $.ajax({
-            type: form.attr('method'),
-            url: form.attr('action'),
-            data: form.serialize(), // Сериализация данных формы
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': form.find('[name=csrfmiddlewaretoken]').val(), // CSRF токен
-            },
-            success: function(data) {
-                // Показываем тост
-                var toastEl = $('.toast').toast('show');
-                console.log(data); // Логируем ответ от сервера
-            },
-            error: function(xhr, status, error) {
-                console.error('Error:', error);
-            }
-        });
-    });
-});
-</script>
-
-	</footer>
+    </footer>
 {% endblock %}

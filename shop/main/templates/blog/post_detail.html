@@ -91,28 +91,36 @@
 		</div>
 	</nav>
 <div class="container">
-   <div class="row justify-content-center">
+   <div class="row">
       <div class="col-lg-8">
-         <div class="post">
-            <div class="product-card">
-               <div class="product-thumb">
-                  <img src="{{ product.image.url }}" alt="{{ product.title }}">
+         <div class="product-card">
+            <div class="row">
+               <div class="col-md-4">
+                  <div class="product-thumb">
+                     <img src="{{ product.image.url }}" alt="{{ product.title }}">
+                  </div>
                </div>
-               <div class="product-details">
-                  <h2>{{ product.title }}</h2>
-                  <p>{{ product.description }}</p>
-                  <p class="price">${{ product.price }}</p>
-                  <!-- Форма для добавления продукта в корзину -->
-                  <form id="cart-form" action="{% url 'cart:cart_add' product.id %}" method="post">
-                     {% csrf_token %}
-                     {{ cart_product_form }}
-                     <button type="submit" class="btn btn-dark"> <!-- Изменен класс на btn-dark -->
-                        <i class="fas fa-shopping-cart"></i> Add to Cart
-                     </button>
-                  </form>
+               <div class="col-md-8">
+                  <div class="product-details">
+                     <h2>{{ product.title }}</h2>
+                     <p>{{ product.description }}</p>
+                     <p class="price">${{ product.price }}</p>
+                     <!-- Форма для добавления продукта в корзину -->
+                     <form id="cart-form" action="{% url 'cart:cart_add' product.id %}" method="post">
+                        {% csrf_token %}
+                        {{ cart_product_form }}
+                        <button type="submit" class="btn btn-dark">
+                           <i class="fas fa-shopping-cart"></i> Add to Cart
+                        </button>
+                     </form>
+                  </div>
                </div>
             </div>
          </div>
+      </div>
+   </div>
+</div>
+
 
          <!-- Форма для добавления отзыва -->
          <div class="mt-4">
