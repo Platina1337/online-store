@@ -30,3 +30,12 @@ class ReviewForm(forms.ModelForm):
         model = Review
         fields = ['content']
 
+    def __init__(self, *args, **kwargs):
+        super(ReviewForm, self).__init__(*args, **kwargs)
+        self.fields['content'].widget.attrs.update({
+            'rows': 3,  # Установите желаемое количество строк
+            'cols': 40,  # Установите желаемое количество столбцов
+            'placeholder': 'Напишите ваш отзыв здесь...',  # Опционально: добавьте placeholder
+            'class': 'form-control',  # Добавьте класс Bootstrap для стилизации
+        })
+
