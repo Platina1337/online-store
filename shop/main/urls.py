@@ -15,4 +15,5 @@ urlpatterns = [
     path('login/', user_login, name='login'),
     path('logout/', logout_user, name="logout"),
     path('csrf_failure/', csrf_failure, name='csrf_failure'),
+    path('like/<int:material_id>/', like_material, name='like_material'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

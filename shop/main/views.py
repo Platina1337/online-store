@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
+
 from django.contrib.auth.models import User
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.views import View
@@ -8,47 +9,51 @@ from typing import Any
 
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, DetailView
-from .models import BuildingMaterials, Review
+from .models import BuildingMaterials, Review, Like, Profile
 from django.views.decorators.http import require_POST
 from cart.forms import CartAddProductForm
 
 def product_detail(request, id, slug):
-    # Получаем продукт (пост) по id и slug
     product = get_object_or_404(BuildingMaterials, id=id, slug=slug, available=True)
     reviews = Review.objects.filter(post=product)
-    # Форма для добавления продукта в корзину
+
+    # Pagination - Show 4 reviews per page
+    paginator = Paginator(reviews, 4)
+    page_number = request.GET.get('page')  # Get the current page number
+    try:
+        reviews = paginator.page(page_number)
+    except PageNotAnInteger:
+        reviews = paginator.page(1)  # If page is not an integer, deliver first page
+    except EmptyPage:
+        reviews = paginator.page(paginator.num_pages)  # If page is out of range, deliver last page
+
     cart_product_form = CartAddProductForm()
 
-    # Проверяем метод запроса
     if request.method == 'POST':
         if request.user.is_authenticated:
             review_form = ReviewForm(request.POST)
             if review_form.is_valid():
-                # Создаем объект отзыва, связываем с продуктом и текущим пользователем
                 review = review_form.save(commit=False)
                 review.post = product
-                review.author = request.user  # Устанавливаем текущего пользователя как автора отзыва
+                review.author = request.user
                 review.save()
-                # Опциональное сообщение об успешном добавлении отзыва
-                # Можно добавить сообщение об успешном добавлении отзыва
-                return redirect('main:post-detail', id=id, slug=slug)  # Перенаправляем обратно на страницу продукта
+                return redirect('main:post-detail', id=id, slug=slug)
 
     else:
         review_form = ReviewForm()
 
-    # Отображаем шаблон с информацией о продукте, формой для корзины и формой для отзыва
     return render(request, 'blog/post_detail.html', {
         'product': product,
         'cart_product_form': cart_product_form,
         'review_form': review_form,
-        'reviews': reviews  # Передаем список отзывов в контекст шаблона
+        'reviews': reviews,  # Paginated reviews
     })
 
 
 
 
 
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 import requests
 
@@ -57,11 +62,24 @@ from django.shortcuts import redirect
 
 import requests
 from django.http import JsonResponse
-
+from django.urls import reverse
 import requests
+from django.contrib.auth.decorators import login_required
 
+@login_required  # Декоратор, чтобы проверить, что пользователь аутентифицирован
+def like_material(request, material_id):
+    material = get_object_or_404(BuildingMaterials, pk=material_id)
 
+    try:
+        user_profile = request.user.profile
+    except AttributeError:
+        user_profile = None
 
+    # Создаем объект Like, связывая его с профилем пользователя и материалом
+    like, created = Like.objects.get_or_create(user=user_profile, material=material)
+
+    # Перенаправляем пользователя обратно на страницу материала
+    return HttpResponseRedirect(reverse('main:post-detail', args=[material_id, material.slug]))
 
 from rest_framework.decorators import api_view
 
@@ -148,15 +166,16 @@ class ViewIndex(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Получаем объекты для текущей страницы с помощью пагинатора
         page_objects = context['post']
         paginator = Paginator(page_objects, self.paginate_by)
-
-        # Получаем номер текущей страницы из GET-параметра 'page'
         page_number = self.request.GET.get('page')
         page_objects = paginator.get_page(page_number)
 
-        # Обновляем контекст данных для передачи объектов текущей страницы
+        if self.request.user.is_authenticated:
+            user_profile = self.request.user.profile  # Предположим, что у пользователя есть профиль
+            for material in page_objects:
+                material.is_liked = Like.objects.filter(user=user_profile, material=material).exists()
+
         context['post'] = page_objects
         return context
 
@@ -180,9 +199,7 @@ class RegistrationView(View):
 
     def post(self, request):
         form = self.form_class(request.POST)
-        print(request.POST)
         if form.is_valid():
-            print('Form is valid')
             username = form.cleaned_data['username']
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
@@ -190,14 +207,18 @@ class RegistrationView(View):
             # Создание нового пользователя
             user = User.objects.create_user(username=username, email=email, password=password)
 
-            # Сохранение пользователя в базе данных
-            user.save()
+            # Создание профиля для пользователя
+            profile = Profile.objects.create(user=user, email=email)
+
+            # Проверим, что профиль успешно создан
+            if profile:
+                print(f'Profile created successfully for {username}')
 
             return redirect('main:login')  # Перенаправление на страницу с успехом
         else:
             print('Form is invalid')
             print(form.errors)
-        return render(request, self.template_name, {'form': form})
+            return render(request, self.template_name, {'form': form})
 
 
 def user_login(request):
