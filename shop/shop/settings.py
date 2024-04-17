@@ -80,10 +80,15 @@ WSGI_APPLICATION = 'shop.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'buildingmaterialsbd',  # Название вашей базы данных MySQL
+        'USER': 'root',                  # Имя пользователя базы данных
+        'PASSWORD': '12345678',                  # Пароль базы данных (оставьте пустым, если нет пароля)
+        'HOST': '127.0.0.1',             # Хост базы данных (обычно '127.0.0.1' для локального подключения)
+        'PORT': '3306',                  # Порт базы данных MySQL (обычно '3306' для MySQL)
     }
 }
+
 
 
 # Password validation

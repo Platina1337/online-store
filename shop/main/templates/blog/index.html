@@ -5,94 +5,7 @@
 {% endblock %}
 {% block content %}
 
-<nav class="navbar navbar-expand-lg navbar-light">
-		<div class="container-fluid">
-			<a class="navbar-brand" href="{% url 'main:index' %}">Stroev-Home</a>
-			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbarSupportedContent">
-				<ul class="navbar-nav me-auto mb-2 mb-lg-0 top-menu">
-					<li class="nav-item">
-						<a class="nav-link" href="{% url 'main:index' %}">Home</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="#Catalog">Catalog</a>
-					</li>
-					<li class="nav-item" >
-						<a class="nav-link" href="#News">News</a>
-					</li>
-				</ul>
-				<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"><i class="far fa-user"></i></a>
-						<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            {% if user.is_authenticated %}
-                                {% if user.is_superuser %}
-                                    <!-- Суперпользователь -->
-                                    <li>
-                                        <a class="dropdown-item" href="{% url 'admin:login' %}">
-                                            <img src="{{ user.profile.image.url }}" alt="{{ user.username }}" class="avatar">
-                                            {{ user.username }}
-                                        </a>
-                                    </li>
-                                {% else %}
-                                    <!-- Обычный пользователь -->
-                                    <li>
-                                        <a class="dropdown-item" href="#">
-                                            <img src="{{ user.profile.image.url }}" alt="{{ user.username }}" class="avatar">
-                                            {{ user.username }}
-                                        </a>
-                                    </li>
-                                {% endif %}
-                                <!-- Кнопка выхода -->
-                                <li><a class="dropdown-item" href="{% url 'main:logout' %}">Выйти</a></li>
-                            {% else %}
-                                <!-- Незарегистрированный пользователь -->
-                                <li><a class="dropdown-item" href="{% url 'main:login' %}">Авторизация</a></li>
-                                <li><a class="dropdown-item" href="{% url 'main:register' %}">Регистрация</a></li>
-                            {% endif %}
-                        </ul>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="{% url 'main:home' %}" data-bs-toggle="modal" data-bs-target="#modal-cart">
-							<i class="fas fa-shopping-cart"></i>
-						</a>
-						<div class="modal fade" id="modal-cart" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-							<div class="modal-dialog modal-xl">
-								<div class="modal-content">
-									<div class="modal-header bg-secondary text-white">
-										<h5 class="modal-title" id="exampleModalLabel">Корзина</h5>
-										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-									</div>
-									<div class="modal-body">
-										<table class="table">
-											<tbody>
-												<tr>
-													<a href="#"><td>
-														<img src="#" alt=""></td></a>
-													<td><a href="#"></a></td>
-													<td></td>
-													<td></td>
-												</tr>
-											</tbody>
-										</table>
-									</div>
-									<div class="modal-footer">
-										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-										<button type="button" class="btn btn-primary">Save changes</button>
-									</div>
-								</div>
-							</div>
-						</div>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="#"><i class="fas fa-search"></i></a>
-					</li>
-				</ul>
-			</div>
-		</div>
-	</nav>
+
     <div class="container-fluid my-carousel">
         <div id="carouselExampleIndicators" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
             <div class="carousel-indicators">
@@ -197,6 +110,41 @@
             {% endif %}
         </ul>
     {% endif %}
+<svg preserveAspectRatio="xMidYMid slice" viewBox="10 10 80 80">
+    <defs>
+        <style>
+            @keyframes rotate {
+					 0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+            .out-top {
+                animation: rotate 20s linear infinite;
+                transform-origin: 13px 25px;
+            }
+            .in-top {
+                animation: rotate 10s linear infinite;
+                transform-origin: 13px 25px;
+            }
+            .out-bottom {
+                animation: rotate 25s linear infinite;
+                transform-origin: 84px 93px;
+            }
+            .in-bottom {
+                animation: rotate 15s linear infinite;
+                transform-origin: 84px 93px;
+            }
+        </style>
+    </defs>
+    <path fill="#9b5de5" class="out-top" d="M37-5C25.1-14.7,5.7-19.1-9.2-10-28.5,1.8-32.7,31.1-19.8,49c15.5,21.5,52.6,22,67.2,2.3C59.4,35,53.7,8.5,37-5Z"/>
+    <path fill="#f15bb5" class="in-top" d="M20.6,4.1C11.6,1.5-1.9,2.5-8,11.2-16.3,23.1-8.2,45.6,7.4,50S42.1,38.9,41,24.5C40.2,14.1,29.4,6.6,20.6,4.1Z"/>
+    <path fill="#00bbf9" class="out-bottom" d="M105.9,48.6c-12.4-8.2-29.3-4.8-39.4.8-23.4,12.8-37.7,51.9-19.1,74.1s63.9,15.3,76-5.6c7.6-13.3,1.8-31.1-2.3-43.8C117.6,63.3,114.7,54.3,105.9,48.6Z"/>
+    <path fill="#00f5d4" class="in-bottom" d="M102,67.1c-9.6-6.1-22-3.1-29.5,2-15.4,10.7-19.6,37.5-7.6,47.8s35.9,3.9,44.5-12.5C115.5,92.6,113.9,74.6,102,67.1Z"/>
+</svg>
+
 {% endblock content %}
 
 {% block footer %}

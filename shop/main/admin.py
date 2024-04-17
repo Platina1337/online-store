@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import BuildingMaterials, Profile, Review
+from .models import BuildingMaterials, Profile, Review, Category
 
 
 # Register your models here.
@@ -14,3 +14,8 @@ class ReviewAdmin(admin.ModelAdmin):
     list_display = ['author', 'content', 'created_at']
 
 admin.site.register(Review, ReviewAdmin)
+
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ['name']
+
+admin.site.register(Category, CategoryAdmin)

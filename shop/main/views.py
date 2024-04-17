@@ -9,7 +9,7 @@ from typing import Any
 
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, DetailView
-from .models import BuildingMaterials, Review, Like, Profile
+from .models import BuildingMaterials, Review, Like, Profile, Category
 from django.views.decorators.http import require_POST
 from cart.forms import CartAddProductForm
 
@@ -235,3 +235,32 @@ def user_login(request):
         return render(request, 'blog/login.html', {'error_message': error_message})
 
     return render(request, 'blog/login.html')
+
+
+class ViewCatalog(ListView):
+    model = BuildingMaterials
+    context_object_name = 'materials'  # лучше использовать множественное число, так как это список объектов
+    template_name = 'blog/Catalog.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all()  # Добавляем все категории в контекст
+        return context
+
+
+def filter_posts(request):
+    category = request.GET.get('category')
+    filtered_posts = BuildingMaterials.objects.filter(category__name=category)
+
+    posts_data = []
+    for post in filtered_posts:
+        posts_data.append({
+            'title': post.title,
+            'description': post.description,
+            'price': post.price,
+            'get_absolute_url': post.get_absolute_url(),
+            'is_liked': post.is_liked,
+            'likes_count': post.likes.count
+        })
+
+    return JsonResponse(posts_data, safe=False)

@@ -16,4 +16,6 @@ urlpatterns = [
     path('logout/', logout_user, name="logout"),
     path('csrf_failure/', csrf_failure, name='csrf_failure'),
     path('like/<int:material_id>/', like_material, name='like_material'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('catalog/', ViewCatalog.as_view(), name='Catalog'),
+    path('filter_posts/', filter_posts, name='filter_posts'),
+              ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
