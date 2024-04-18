@@ -245,6 +245,7 @@ class ViewCatalog(ListView):
     model = BuildingMaterials
     context_object_name = 'materials'
     template_name = 'blog/catalog.html'
+    paginate_by = 9
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -254,7 +255,7 @@ class ViewCatalog(ListView):
             liked_posts = self.request.GET['liked_posts']
             if liked_posts == 'on' and self.request.user.is_authenticated:
                 # Фильтрация материалов по лайкам текущего пользователя
-                queryset = queryset.filter(likes__user=self.request.user.id)
+                queryset = queryset.filter(likes__user=self.request.user)
 
         # Аннотируем каждый материал количеством лайков
         queryset = queryset.annotate(like_count=Count('likes'))
@@ -265,11 +266,20 @@ class ViewCatalog(ListView):
         context = super().get_context_data(**kwargs)
         # Добавляем все категории в контекст (если они нужны для других целей)
         context['categories'] = Category.objects.all()
-        return context
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['categories'] = Category.objects.all()  # Добавляем все категории в контекст
+        # Пагинация
+        page_number = self.request.GET.get('page')
+        paginator = Paginator(context['materials'], self.paginate_by)
+        page_objects = paginator.get_page(page_number)
+
+        if self.request.user.is_authenticated:
+            user_profile = self.request.user.profile  # Предположим, что у пользователя есть профиль
+            for material in page_objects:
+                material.is_liked = Like.objects.filter(user=user_profile, material=material).exists()
+
+        context['materials'] = page_objects
+        context['is_paginated'] = True  # Устанавливаем флаг пагинации в контексте
+
         return context
 
 
@@ -288,3 +298,4 @@ def filter_posts(request, url):
     materials = materials.annotate(like_count=Count('likes'))
 
     return render(request, 'blog/catalog.html', {'categories': categories, 'materials': materials})
+

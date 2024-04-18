@@ -4,65 +4,103 @@
     <link rel="stylesheet" href="{% static 'blog/main.css' %}">
 {% endblock %}
 {% block content %}
-<div class="accordion" id="accordionExample">
-    <div class="accordion-item">
-        <h2 class="accordion-header">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCategories" aria-expanded="true" aria-controls="collapseCategories">
-                Категории
-            </button>
-        </h2>
-        <div id="collapseCategories" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
-            <div class="accordion-body">
-                {% for category in categories %}
-                    <a href="/catalog/{{ category.url }}/" class="category-link" data-category="{{ category.name }}">{{ category.name }}</a>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="form-check">
-    <form method="GET" action="">
-        <input class="form-check-input" type="checkbox" id="liked_posts" name="liked_posts" {% if request.GET.liked_posts %}checked{% endif %}>
-        <label class="form-check-label" for="liked_posts">
-            Понравившиеся посты
-        </label>
-        <button type="submit" class="btn btn-primary">Применить</button>
-    </form>
-</div>
-
-<div id="Catalog" class="container">
-    {% for material in materials %}
-        <div class="col-lg-4 col-sm-6 mb-3">
-            <div class="product-card">
-                <div class="product-thumb">
-                    <a href="{{ material.get_absolute_url }}">
-                        <img src="{{ material.image.url }}" alt="" class="img-fluid rounded" style="max-width: 200px; max-height: 150px; object-fit: cover;">
-                    </a>
-                </div>
-                <div class="product-details">
-                    <h4><a href="{{ material.get_absolute_url }}">{{ material.title }}</a></h4>
-                    <a>{{ material.category }}</a>
-                    <p>{{ material.description }}</p>
-                    <div class="product-bottom-details d-flex justify-content-between">
-                        <div class="product-price">{{ material.price }}</div>
-                        <div class="product-links">
-                            {% if material.is_liked %}
-                                <a href="#" class="liked"><i class="fas fa-heart"></i></a>
-                            {% else %}
-                                <a href="{% url 'main:like_material' material.id %}"><i class="far fa-heart"></i></a>
-                            {% endif %}
-                            <span class="like-count">{{ material.likes.count }}</span>
-                        </div>
+<div class="d-flex">
+    <div>
+        <div class="accordion" id="accordionExample">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCategories" aria-expanded="true" aria-controls="collapseCategories">
+                        Категории
+                    </button>
+                </h2>
+                <div id="collapseCategories" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        {% for category in categories %}
+                            <a href="/catalog/{{ category.url }}/" class="category-link" data-category="{{ category.name }}">{{ category.name }}</a>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
-    {% empty %}
-        <p>No materials found.</p>
-    {% endfor %}
-</div>
+        <div class="form-check">
+            <form method="GET" action="">
+                <input class="form-check-input" type="checkbox" id="liked_posts" name="liked_posts" {% if request.GET.liked_posts %}checked{% endif %}>
+                <label class="form-check-label" for="liked_posts">
+                    Понравившиеся посты
+                </label>
+                <button type="submit" class="btn btn-primary" style="background-color: #a86b03; border-color: #a86b03;">Применить</button>
+            </form>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            {% for material in materials %}
+                <div class="col-lg-4 col-md-6 mb-3"> <!-- Используйте col-md-6 для поддержки средних экранов -->
+                    <div class="product-card">
+                        <div class="product-thumb">
+                            <a href="{{ material.get_absolute_url }}">
+                                <img src="{{ material.image.url }}" alt="" class="img-fluid rounded" style="max-width: 100%;">
+                            </a>
+                        </div>
+                        <div class="product-details">
+                            <h4><a href="{{ material.get_absolute_url }}">{{ material.title }}</a></h4>
+                            <p>{{ material.description }}</p>
+                            <div class="product-bottom-details d-flex justify-content-between">
+                                <div class="product-price">{{ material.price }}</div>
+                                <div class="product-links">
+                                    {% if material.is_liked %}
+                                        <a href="#" class="liked"><i class="fas fa-heart"></i></a>
+                                    {% else %}
+                                        <a href="{% url 'main:like_material' material.id %}"><i class="far fa-heart"></i></a>
+                                    {% endif %}
+                                    <span class="like-count">{{ material.like_count }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p>No materials found.</p>
+            {% endfor %}
+        </div>
+                <!-- Пагинация -->
+        {% if is_paginated %}
+            <nav aria-label="Page navigation" class="my-4">
+                <ul class="pagination justify-content-center">
+                    {% if materials.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if request.GET.liked_posts %}&liked_posts=on{% endif %}">Первая</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ materials.previous_page_number }}{% if request.GET.liked_posts %}&liked_posts=on{% endif %}">Предыдущая</a>
+                        </li>
+                    {% endif %}
 
+                    {% for num in materials.paginator.page_range %}
+                        {% if materials.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if request.GET.liked_posts %}&liked_posts=on{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if materials.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ materials.next_page_number }}{% if request.GET.liked_posts %}&liked_posts=on{% endif %}">Следующая</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ materials.paginator.num_pages }}{% if request.GET.liked_posts %}&liked_posts=on{% endif %}">Последняя</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+</div>
 <svg preserveAspectRatio="xMidYMid slice" viewBox="10 10 80 80">
     <defs>
         <style>

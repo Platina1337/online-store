@@ -18,4 +18,5 @@ urlpatterns = [
     path('like/<int:material_id>/', like_material, name='like_material'),
     path('catalog/', ViewCatalog.as_view(), name='сatalog'),  # Путь для отображения каталога
     path('catalog/<str:url>/', filter_posts, name='filter_posts'),# Путь для фильтрации постов по категории
+
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

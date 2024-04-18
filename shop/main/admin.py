@@ -19,3 +19,4 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ['name']
 
 admin.site.register(Category, CategoryAdmin)
+
