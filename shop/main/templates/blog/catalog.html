@@ -14,46 +14,54 @@
         <div id="collapseCategories" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
             <div class="accordion-body">
                 {% for category in categories %}
-                    <a href="{% url 'main:filter_posts' %}?category={{ category.name }}" class="category-link" data-category="{{ category.name }}">{{ category.name }}</a>
+                    <a href="/catalog/{{ category.url }}/" class="category-link" data-category="{{ category.name }}">{{ category.name }}</a>
                 {% endfor %}
             </div>
         </div>
     </div>
 </div>
+
+<div class="form-check">
+    <form method="GET" action="">
+        <input class="form-check-input" type="checkbox" id="liked_posts" name="liked_posts" {% if request.GET.liked_posts %}checked{% endif %}>
+        <label class="form-check-label" for="liked_posts">
+            Понравившиеся посты
+        </label>
+        <button type="submit" class="btn btn-primary">Применить</button>
+    </form>
+</div>
+
 <div id="Catalog" class="container">
     {% for material in materials %}
-        {% if material.category == selected_category %} {# Условие для фильтрации по категории #}
-            <div class="col-lg-4 col-sm-6 mb-3">
-                <div class="product-card">
-                    <div class="product-thumb">
-                        <a href="{{ material.get_absolute_url }}">
-                            <img src="{{ material.image.url }}" alt="" class="img-fluid rounded" style="max-width: 200px; max-height: 150px; object-fit: cover;">
-                        </a>
-                    </div>
-                    <div class="product-details">
-                        <h4><a href="{{ material.get_absolute_url }}">{{ material.title }}</a></h4>
-                        <a>{{ material.category }}</a>
-                        <p>{{ material.description }}</p>
-                        <div class="product-bottom-details d-flex justify-content-between">
-                            <div class="product-price">{{ material.price }}</div>
-                            <div class="product-links">
-                                {% if material.is_liked %}
-                                    <a href="#" class="liked"><i class="fas fa-heart"></i></a>
-                                {% else %}
-                                    <a href="{% url 'main:like_material' material.id %}"><i class="far fa-heart"></i></a>
-                                {% endif %}
-                                <span class="like-count">{{ material.likes.count }}</span>
-                            </div>
+        <div class="col-lg-4 col-sm-6 mb-3">
+            <div class="product-card">
+                <div class="product-thumb">
+                    <a href="{{ material.get_absolute_url }}">
+                        <img src="{{ material.image.url }}" alt="" class="img-fluid rounded" style="max-width: 200px; max-height: 150px; object-fit: cover;">
+                    </a>
+                </div>
+                <div class="product-details">
+                    <h4><a href="{{ material.get_absolute_url }}">{{ material.title }}</a></h4>
+                    <a>{{ material.category }}</a>
+                    <p>{{ material.description }}</p>
+                    <div class="product-bottom-details d-flex justify-content-between">
+                        <div class="product-price">{{ material.price }}</div>
+                        <div class="product-links">
+                            {% if material.is_liked %}
+                                <a href="#" class="liked"><i class="fas fa-heart"></i></a>
+                            {% else %}
+                                <a href="{% url 'main:like_material' material.id %}"><i class="far fa-heart"></i></a>
+                            {% endif %}
+                            <span class="like-count">{{ material.likes.count }}</span>
                         </div>
                     </div>
                 </div>
             </div>
-        {% endif %}
+        </div>
     {% empty %}
         <p>No materials found.</p>
     {% endfor %}
 </div>
-
 
 <svg preserveAspectRatio="xMidYMid slice" viewBox="10 10 80 80">
     <defs>
@@ -89,7 +97,23 @@
     <path fill="#00bbf9" class="out-bottom" d="M105.9,48.6c-12.4-8.2-29.3-4.8-39.4.8-23.4,12.8-37.7,51.9-19.1,74.1s63.9,15.3,76-5.6c7.6-13.3,1.8-31.1-2.3-43.8C117.6,63.3,114.7,54.3,105.9,48.6Z"/>
     <path fill="#00f5d4" class="in-bottom" d="M102,67.1c-9.6-6.1-22-3.1-29.5,2-15.4,10.7-19.6,37.5-7.6,47.8s35.9,3.9,44.5-12.5C115.5,92.6,113.9,74.6,102,67.1Z"/>
 </svg>
-
-
-
 {% endblock content %}
+{% block footer %}
+    <footer>
+        <div class="footer-content">
+            <h3>Контакты</h3>
+            <p>Телефон: +79206945165</p>
+            <p>Email: bbd3372005@gmail.com</p>
+            <p>Адрес: улица Трехсвятская д.14</p>
+        </div>
+        <div class="footer-content">
+            <h3>Ссылки</h3>
+            <ul>
+                <li><a href="{% url 'main:index' %}">Главная</a></li>
+                <li><a href="#">О нас</a></li>
+                <li><a href="#">Контакты</a></li>
+                <li><a href="#">Услуги</a></li>
+            </ul>
+        </div>
+    </footer>
+{% endblock %}

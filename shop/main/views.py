@@ -109,7 +109,7 @@ def import_contacts_and_send_email(request):
                 'sender_name': 'Гоген Солнцев',
                 'sender_email': 'bbd3372005@gmail.com',
                 'subject': 'СКИДКИ 10000%, ВСЕ БЕСПЛАТНО!!!',
-                'body': '<html><body><h1>СКИДОК НЕТ ЛОШОК</h1></body></html>',
+                'body': '<html><body><h1>СКИДОК НЕТ </h1></body></html>',
                 'list_id': list_id,
                 'email': email
             }
@@ -237,10 +237,35 @@ def user_login(request):
     return render(request, 'blog/login.html')
 
 
+
+
+
+
 class ViewCatalog(ListView):
     model = BuildingMaterials
-    context_object_name = 'materials'  # лучше использовать множественное число, так как это список объектов
-    template_name = 'blog/Catalog.html'
+    context_object_name = 'materials'
+    template_name = 'blog/catalog.html'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Проверяем наличие параметра 'liked_posts' в GET-запросе
+        if 'liked_posts' in self.request.GET:
+            liked_posts = self.request.GET['liked_posts']
+            if liked_posts == 'on' and self.request.user.is_authenticated:
+                # Фильтрация материалов по лайкам текущего пользователя
+                queryset = queryset.filter(likes__user=self.request.user.id)
+
+        # Аннотируем каждый материал количеством лайков
+        queryset = queryset.annotate(like_count=Count('likes'))
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Добавляем все категории в контекст (если они нужны для других целей)
+        context['categories'] = Category.objects.all()
+        return context
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -248,19 +273,18 @@ class ViewCatalog(ListView):
         return context
 
 
-def filter_posts(request):
-    category = request.GET.get('category')
-    filtered_posts = BuildingMaterials.objects.filter(category__name=category)
+from django.db.models import Count
 
-    posts_data = []
-    for post in filtered_posts:
-        posts_data.append({
-            'title': post.title,
-            'description': post.description,
-            'price': post.price,
-            'get_absolute_url': post.get_absolute_url(),
-            'is_liked': post.is_liked,
-            'likes_count': post.likes.count
-        })
+def filter_posts(request, url):
+    materials = BuildingMaterials.objects.filter(category__url=url)
+    categories = Category.objects.all()
 
-    return JsonResponse(posts_data, safe=False)
+    if 'liked_posts' in request.GET:
+        liked_posts = request.GET['liked_posts']
+        if liked_posts == 'on' and request.user.is_authenticated:
+            materials = materials.filter(likes__user=request.user.id)
+
+    # Аннотируем каждый материал количеством лайков
+    materials = materials.annotate(like_count=Count('likes'))
+
+    return render(request, 'blog/catalog.html', {'categories': categories, 'materials': materials})

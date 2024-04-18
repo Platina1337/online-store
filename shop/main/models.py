@@ -6,8 +6,14 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils.text import slugify
 # Create your models here.
+
+from django.utils.text import slugify
+
+
 class Category(models.Model):
     name = models.CharField(max_length=128, verbose_name='Название категории')
+    description = models.TextField('Описание категории кратко ')
+    url = models.SlugField(max_length=200, unique=True)
 
     def __str__(self):
         return self.name
