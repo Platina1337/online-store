@@ -13,3 +13,12 @@ class ViewNews(ListView):
 def get_video(request, pk: int):
     _video = get_object_or_404(Video, id=pk)
     return render(request, "news/news.html", {"video": _video})
+
+
+class BaseView(ListView):
+    model = Video
+    context_object_name = 'videos'
+    template_name = 'news/base.html'
+
+    def get_queryset(self):
+        return Video.objects.all()

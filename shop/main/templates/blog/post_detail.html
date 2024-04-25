@@ -1,4 +1,4 @@
-{% extends "blog/base.html" %}
+{% extends "news/base.html" %}
 {% load static %}
 {% block css %}
 	<link rel="stylesheet" href="{% static 'blog/main.css' %}">
@@ -34,32 +34,6 @@
                            <i class="fas fa-shopping-cart"></i> Добавить в корзину
                         </button>
                      </form>
-                      <script>
-                        document.getElementById('cart-form').addEventListener('submit', function(event) {
-                            event.preventDefault(); // Предотвращаем стандартное поведение отправки формы
-
-                            // Получаем данные формы
-                            const formData = new FormData(this);
-                            const productId = this.getAttribute('data-product-id');
-
-                            // Отправляем AJAX-запрос на добавление товара в корзину
-                            fetch(`/cart/add/${productId}/`, {
-                                method: 'POST',
-                                body: formData
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                // Обновляем содержимое корзины на странице
-                                const cartContent = document.getElementById('cart-content');
-                                if (cartContent) {
-                                    cartContent.innerHTML = data.cart_html; // Обновляем содержимое корзины
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Ошибка при добавлении товара в корзину:', error);
-                            });
-                        });
-                    </script>
                   </div>
                </div>
             </div>

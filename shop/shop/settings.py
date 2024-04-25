@@ -131,7 +131,8 @@ STATIC_URL = '/static/'
 
 
 STATICFILES_DIRS = [
-    BASE_DIR / 'main/static/'
+    BASE_DIR / 'main/static/',  # Добавляем директорию main/static/
+    BASE_DIR / 'news/static/',
 ]
 
 # Default primary key field type

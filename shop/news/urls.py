@@ -6,6 +6,6 @@ from django.conf.urls.static import static
 
 urlpatterns = [
 
-    path('', ViewNews.as_view(), name='news'),
+    path('', get_video, name='news'),
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,35 +1,40 @@
-{% extends "blog/base.html" %}
+{% extends "news/base.html" %}
 {% load static %}
 {% block css %}
+    <link rel="stylesheet" href="{% static 'news/news.css' %}">
     <link rel="stylesheet" href="{% static 'blog/main.css' %}">
+
 {% endblock %}
 {% block content %}
 <div class="main-posts">
-  <div class="container">
-    <div class="row">
-      <div class="blog-masonry masonry-true">
-        {% for video in video_list %}
-          <div class="post-masonry col-md-4 col-sm-6">
-            <div class="post-thumb">
-              <img src="{{ video.image.url }}" alt="">
-              <div class="title-over">
-                <h4>{{ video.title }}</h4>
-              </div>
-              <div class="post-hover text-center">
-                <div class="inside">
-                  <i class="fa fa-plus"></i>
-                  <span class="date">{{ video.create_at }}</span>
-                  <h4><a href="#">{{ video.title }}</a></h4>
-                  <p>{{ video.description|slice:":100" }}</p>
-                </div>
-              </div>
-            </div>
-          </div> <!-- /.post-masonry -->
-        {% endfor %}
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6 col-sm-6">
+          <img class="single-video" src="{{ video.image.url }}" alt="">
+        </div>
+        <div class="col-md-6 col-sm-6">
+          <span class="date">{{ video.create_at }}</span>
+          <h4><a href="{% url 'news:news' %}">{{ video.title }}</a></h4>
+          <p>{{ video.description }}</p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12 col-sm-12">
+          <video
+              id="my-video"
+              class="video-js"
+              controls
+              preload="auto"
+              width="1000"
+              height="800"
+              data-setup="{}"
+          >
+
+          </video>
+        </div>
       </div>
     </div>
   </div>
-</div>
 <svg preserveAspectRatio="xMidYMid slice" viewBox="10 10 80 80">
     <defs>
         <style>

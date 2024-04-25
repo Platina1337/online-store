@@ -20,9 +20,8 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('news/', include(('news.urls', 'news'), namespace='news')),
     path('cart/', include(('cart.urls', 'cart'), namespace='cart')),
     path('', include(('main.urls', 'main'), namespace='main')),
-    path('news/', include(('news.urls', 'news'), namespace='news')),
-
 
 ]

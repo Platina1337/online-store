@@ -380,3 +380,13 @@ a img.icon {
     height: 1em;
     margin: 0 0 -0.1em 0.3em;
 }
+/* Стили для формы поиска */
+.navbar-nav .nav-item form {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-nav .nav-item form:hover {
+    background-color: rgba(0, 0, 0, 0.1); /* Черная подсветка при наведении */
+    transition: background-color 0.3s ease;
+}

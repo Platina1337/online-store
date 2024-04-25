@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import BuildingMaterials, Profile, Review, Category
+from .models import BuildingMaterials, Profile, Review, Category, Like
 
 
 # Register your models here.
@@ -19,4 +19,9 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ['name']
 
 admin.site.register(Category, CategoryAdmin)
+
+class LikesAdmin(admin.ModelAdmin):
+    list_display = ['user', 'material']
+
+admin.site.register(Like, LikesAdmin)
 

@@ -12,6 +12,7 @@ from django.views.generic import ListView, DetailView
 from .models import BuildingMaterials, Review, Like, Profile, Category
 from django.views.decorators.http import require_POST
 from cart.forms import CartAddProductForm
+from news.models import Video
 
 def product_detail(request, id, slug):
     product = get_object_or_404(BuildingMaterials, id=id, slug=slug, available=True)
@@ -88,9 +89,8 @@ def import_contacts_and_send_email(request):
     if request.method == 'POST':
         email = request.POST.get('email')
 
-        # Параметры для добавления в список Unisender
         api_key = '6tn47mrmxx76i9ooh4mbb8uwezrufedg34xk9kxo'
-        list_id = '1'  # ID вашего списка в Unisender
+        list_id = '1'
 
         # Добавляем контакт в список Unisender
         import_url = f'https://api.unisender.com/ru/api/importContacts?format=json&api_key={api_key}&field_names[0]=email&field_names[1]=email_list_ids&data[0][0]={email}&data[0][1]={list_id}'
@@ -102,7 +102,6 @@ def import_contacts_and_send_email(request):
                 return JsonResponse({"error": "Произошла ошибка при добавлении контакта: " + import_data['error']},
                                     status=400)
 
-            # Контакт успешно добавлен, отправляем ему письмо
             send_email_url = 'https://api.unisender.com/ru/api/sendEmail'
             send_email_payload = {
                 'api_key': api_key,
@@ -157,7 +156,7 @@ class ViewIndex(ListView):
     context_object_name = 'post'
     fields = ['title', 'content', 'image', 'price']
     template_name = 'blog/index.html'
-    paginate_by = 9
+    paginate_by = 4
 
     def get_queryset(self):
         # Получаем queryset всех объектов BuildingMaterials
@@ -177,6 +176,12 @@ class ViewIndex(ListView):
                 material.is_liked = Like.objects.filter(user=user_profile, material=material).exists()
 
         context['post'] = page_objects
+        random_objects = list(BuildingMaterials.objects.order_by('?')[:self.paginate_by])
+        context['post'] = random_objects
+
+        populars = BuildingMaterials.objects.annotate(like_count=Count('likes')).order_by('-like_count')[:self.paginate_by]
+        context['populars'] = populars
+
         return context
 
 
@@ -250,12 +255,13 @@ class ViewCatalog(ListView):
     def get_queryset(self):
         queryset = super().get_queryset()
 
-        # Проверяем наличие параметра 'liked_posts' в GET-запросе
         if 'liked_posts' in self.request.GET:
             liked_posts = self.request.GET['liked_posts']
             if liked_posts == 'on' and self.request.user.is_authenticated:
-                # Фильтрация материалов по лайкам текущего пользователя
-                queryset = queryset.filter(likes__user=self.request.user)
+                # Получаем объект пользователя из запроса
+                user = self.request.user
+                # Фильтруем материалы по лайкам текущего пользователя
+                queryset = queryset.filter(likes__user=user)
 
         # Аннотируем каждый материал количеством лайков
         queryset = queryset.annotate(like_count=Count('likes'))
@@ -266,7 +272,7 @@ class ViewCatalog(ListView):
         context = super().get_context_data(**kwargs)
         # Добавляем все категории в контекст (если они нужны для других целей)
         context['categories'] = Category.objects.all()
-
+        context['materials'] = BuildingMaterials.objects.all()
         # Пагинация
         page_number = self.request.GET.get('page')
         paginator = Paginator(context['materials'], self.paginate_by)
@@ -279,23 +285,80 @@ class ViewCatalog(ListView):
 
         context['materials'] = page_objects
         context['is_paginated'] = True  # Устанавливаем флаг пагинации в контексте
-
+        context['is_catalog_page'] = True
         return context
 
+from django.db.models import Q
+def search_results(request):
+    query = request.GET.get('q')
+    categories = Category.objects.all()
+    materials = BuildingMaterials.objects.all()
+
+    if query:
+        # Создаем Q объект для фильтрации по заголовку
+        title_filter = Q(title__icontains=query)
+
+        # Фильтруем материалы по запросу
+        materials = materials.filter(title_filter)
+
+        # Если пользователь аутентифицирован и выбран фильтр по лайкам
+        if request.user.is_authenticated and 'liked_posts' in request.GET and request.GET['liked_posts'] == 'on':
+            # Создаем Q объект для фильтрации по лайкам текущего пользователя
+            likes_filter = Q(likes__user=request.user)
+
+            # Комбинируем Q объекты для фильтрации по запросу и по лайкам
+            materials = materials.filter(title_filter & likes_filter)
+
+    # Пагинация результатов
+    paginator = Paginator(materials, 9)
+    page_number = request.GET.get('page')
+
+    try:
+        materials_paginated = paginator.page(page_number)
+        is_paginated = True
+    except PageNotAnInteger:
+        materials_paginated = paginator.page(1)
+        is_paginated = True
+    except EmptyPage:
+        materials_paginated = paginator.page(paginator.num_pages)
+        is_paginated = True
+
+    return render(request, 'blog/catalog.html', {
+        'categories': categories,
+        'materials': materials_paginated,
+        'query': query,
+        'is_catalog_page': True,
+        'is_paginated': is_paginated
+    })
 
 from django.db.models import Count
+
 
 def filter_posts(request, url):
     materials = BuildingMaterials.objects.filter(category__url=url)
     categories = Category.objects.all()
 
-    if 'liked_posts' in request.GET:
-        liked_posts = request.GET['liked_posts']
-        if liked_posts == 'on' and request.user.is_authenticated:
-            materials = materials.filter(likes__user=request.user.id)
+    if 'liked_posts' in request.GET and request.GET['liked_posts'] == 'on' and request.user.is_authenticated:
+        materials = materials.filter(likes__user=request.user.id)
 
-    # Аннотируем каждый материал количеством лайков
     materials = materials.annotate(like_count=Count('likes'))
 
-    return render(request, 'blog/catalog.html', {'categories': categories, 'materials': materials})
+    paginator = Paginator(materials, 9)
+    page_number = request.GET.get('page')
 
+    try:
+        materials_paginated = paginator.page(page_number)
+        is_paginated = True
+    except PageNotAnInteger:
+        materials_paginated = paginator.page(1)
+        is_paginated = True
+    except EmptyPage:
+        materials_paginated = paginator.page(paginator.num_pages)
+        is_paginated = True
+
+    return render(request, 'blog/catalog.html', {
+        'categories': categories,
+        'materials': materials_paginated,
+        'is_paginated': is_paginated,
+        'is_catalog_page': True
+    })
