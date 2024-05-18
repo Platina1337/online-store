@@ -22,6 +22,13 @@ class Profile(models.Model):
     email = models.EmailField(max_length=254, default='xxx@mail.com')
     image = models.ImageField(upload_to='profile_images', default='profile_pics/default.jpg')
 
+    first_name = models.CharField(max_length=100, null=True)
+    last_name = models.CharField(max_length=100, null=True)
+    address = models.CharField(max_length=255, null=True)
+    postal_code = models.CharField(max_length=20, null=True)
+    city = models.CharField(max_length=100, null=True)
+
+
     def __str__(self):
         return f'{self.user.username} Profile'
 

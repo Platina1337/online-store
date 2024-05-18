@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
-
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django import forms
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import get_object_or_404
@@ -8,11 +9,12 @@ from django.views import View
 from typing import Any
 
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, UpdateView
 from .models import BuildingMaterials, Review, Like, Profile, Category
 from django.views.decorators.http import require_POST
 from cart.forms import CartAddProductForm
 from news.models import Video
+from orders.models import OrderItem
 
 def product_detail(request, id, slug):
     product = get_object_or_404(BuildingMaterials, id=id, slug=slug, available=True)
@@ -242,49 +244,41 @@ def user_login(request):
     return render(request, 'blog/login.html')
 
 
-
-
-
-
 class ViewCatalog(ListView):
     model = BuildingMaterials
-    context_object_name = 'materials'
     template_name = 'blog/catalog.html'
     paginate_by = 9
 
     def get_queryset(self):
         queryset = super().get_queryset()
 
-        if 'liked_posts' in self.request.GET:
+        if 'liked_posts' in self.request.GET and self.request.user.is_authenticated:
             liked_posts = self.request.GET['liked_posts']
-            if liked_posts == 'on' and self.request.user.is_authenticated:
-                # Получаем объект пользователя из запроса
+            if liked_posts == 'on':
                 user = self.request.user
-                # Фильтруем материалы по лайкам текущего пользователя
                 queryset = queryset.filter(likes__user=user)
 
-        # Аннотируем каждый материал количеством лайков
-        queryset = queryset.annotate(like_count=Count('likes'))
-
-        return queryset
+        return queryset.annotate(like_count=Count('likes'))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Добавляем все категории в контекст (если они нужны для других целей)
         context['categories'] = Category.objects.all()
-        context['materials'] = BuildingMaterials.objects.all()
+
+        # Получаем материалы с учетом фильтрации
+        materials = self.get_queryset()
+
         # Пагинация
         page_number = self.request.GET.get('page')
-        paginator = Paginator(context['materials'], self.paginate_by)
+        paginator = Paginator(materials, self.paginate_by)
         page_objects = paginator.get_page(page_number)
 
         if self.request.user.is_authenticated:
-            user_profile = self.request.user.profile  # Предположим, что у пользователя есть профиль
+            user_profile = self.request.user.profile
             for material in page_objects:
                 material.is_liked = Like.objects.filter(user=user_profile, material=material).exists()
 
         context['materials'] = page_objects
-        context['is_paginated'] = True  # Устанавливаем флаг пагинации в контексте
+        context['is_paginated'] = True
         context['is_catalog_page'] = True
         return context
 
@@ -295,21 +289,15 @@ def search_results(request):
     materials = BuildingMaterials.objects.all()
 
     if query:
-        # Создаем Q объект для фильтрации по заголовку
         title_filter = Q(title__icontains=query)
-
-        # Фильтруем материалы по запросу
         materials = materials.filter(title_filter)
 
-        # Если пользователь аутентифицирован и выбран фильтр по лайкам
         if request.user.is_authenticated and 'liked_posts' in request.GET and request.GET['liked_posts'] == 'on':
-            # Создаем Q объект для фильтрации по лайкам текущего пользователя
             likes_filter = Q(likes__user=request.user)
-
-            # Комбинируем Q объекты для фильтрации по запросу и по лайкам
+            materials = materials.annotate(like_count=Count('likes'))
             materials = materials.filter(title_filter & likes_filter)
 
-    # Пагинация результатов
+
     paginator = Paginator(materials, 9)
     page_number = request.GET.get('page')
 
@@ -322,6 +310,11 @@ def search_results(request):
     except EmptyPage:
         materials_paginated = paginator.page(paginator.num_pages)
         is_paginated = True
+
+    if request.user.is_authenticated:
+        user_profile = request.user.profile
+        for material in materials_paginated:
+            material.is_liked = Like.objects.filter(user=user_profile, material=material).exists()
 
     return render(request, 'blog/catalog.html', {
         'categories': categories,
@@ -356,9 +349,37 @@ def filter_posts(request, url):
         materials_paginated = paginator.page(paginator.num_pages)
         is_paginated = True
 
+    if request.user.is_authenticated:
+        user_profile = request.user.profile
+        for material in materials_paginated:
+            material.is_liked = Like.objects.filter(user=user_profile, material=material).exists()
+
     return render(request, 'blog/catalog.html', {
         'categories': categories,
         'materials': materials_paginated,
         'is_paginated': is_paginated,
         'is_catalog_page': True
     })
+class ProfileForm(forms.ModelForm):
+    image = forms.ImageField(required=False)
+
+    class Meta:
+        model = Profile
+        fields = ['image', 'first_name', 'last_name', 'postal_code', 'city', 'email', 'address']
+class ProfileView(LoginRequiredMixin, UpdateView):
+    model = Profile
+    template_name = 'blog/Profile.html'
+    context_object_name = 'profile'
+    form_class = ProfileForm
+
+    def get_object(self, queryset=None):
+        return self.request.user.profile
+
+    def get_success_url(self):
+        return reverse('main:profile')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        Order = OrderItem.objects.filter(profile=self.request.user.profile).count()
+        context['order'] = Order
+        return context

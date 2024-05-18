@@ -1,0 +1,135 @@
+
+{% extends "news/base.html" %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'blog/main.css' %}">
+{% endblock %}
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Checkout</h1>
+        <div class="checkout-container">
+            <form action="." method="post" class="order-form">
+                {{ form.as_p }}
+                <p><input type="submit" value="Place order"></p>
+                {% csrf_token %}
+            </form>
+            <div class="order-info">
+                <h3>Your order</h3>
+                <ul>
+                    {% for item in cart %}
+                        <li>
+                            <span>{{ item.quantity }}x {{ item.product.name }}</span>
+                            <span>${{ item.total_price }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p>Total: ${{ cart.get_total_price }}</p>
+            </div>
+        </div>
+    </div>
+    <style>
+
+
+        h1 {
+            color: #333;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .checkout-container {
+            display: flex;
+            justify-content: flex-start;
+            gap: 20px;
+            max-width: 900px;
+        }
+
+        .order-info {
+            width: 300px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            align-self: flex-start; /* Поднимает блок вверх */
+        }
+
+        .order-info h3 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+
+        .order-info ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin: 0 0 20px;
+        }
+
+        .order-info li {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        .order-info p {
+            font-weight: bold;
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .order-form {
+            width: 400px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .order-form p {
+            margin-bottom: 15px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="submit"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0;
+            padding: 20px;
+        }
+    </style>
+{% endblock %}

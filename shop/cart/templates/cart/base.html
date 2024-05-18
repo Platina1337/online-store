@@ -15,14 +15,12 @@
     {% endblock %}
 
 	<title>Hello, world!</title>
+
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-light fixed-top">
+<nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
-        <a class="navbar-brand" href="{% url 'main:index' %}">
-            <img src="{% static 'img/favicon.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
-            Stroev-Home
-        </a>
+        <a class="navbar-brand" href="{% url 'main:index' %}">Stroev-Home</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -40,15 +38,17 @@
             </ul>
             <ul class="navbar-nav mb-2 mb-lg-0 ms-auto">
                 {% if is_catalog_page %}
-                <!-- Search form positioned to the right -->
+                <!-- Перемещение формы поиска вправо с помощью ms-auto -->
                 <li class="nav-item">
                     <form class="d-flex" action="{% url 'main:search_results' %}" method="GET">
                         <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="q">
+                        <!-- Изменение цвета кнопки Search на черный -->
                         <button class="btn btn-outline-dark" type="submit">Search</button>
+                        <!-- Конец изменения цвета кнопки Search -->
                     </form>
                 </li>
                 {% endif %}
-                <!-- End of search form positioning -->
+                <!-- Конец перемещения формы поиска -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"><i class="far fa-user"></i></a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -62,16 +62,16 @@
                                 </li>
                             {% else %}
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'main:profile' %}">
+                                    <a class="dropdown-item" href="#">
                                         <img src="{{ user.profile.image.url }}" alt="{{ user.username }}" class="avatar">
                                         {{ user.username }}
                                     </a>
                                 </li>
                             {% endif %}
-                            <li><a class="dropdown-item" href="{% url 'main:logout' %}">Logout</a></li>
+                            <li><a class="dropdown-item" href="{% url 'main:logout' %}">Выйти</a></li>
                         {% else %}
-                            <li><a class="dropdown-item" href="{% url 'main:login' %}">Login</a></li>
-                            <li><a class="dropdown-item" href="{% url 'main:register' %}">Sign Up</a></li>
+                            <li><a class="dropdown-item" href="{% url 'main:login' %}">Авторизация</a></li>
+                            <li><a class="dropdown-item" href="{% url 'main:register' %}">Регистрация</a></li>
                         {% endif %}
                     </ul>
                 </li>
@@ -84,6 +84,7 @@
         </div>
     </div>
 </nav>
+
 {% block content %}
 {% endblock %}
 

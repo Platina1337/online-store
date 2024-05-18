@@ -7,85 +7,165 @@
     Your shopping cart
 {% endblock %}
 {% block content %}
-    <h1>Your shopping cart</h1>
-    <table class="cart">
-        <thead>
-        <tr>
-            <th>Image</th>
-            <th>Product</th>
-            <th>Quantity</th>
-            <th>Remove</th>
-            <th>Unit price</th>
-            <th>Price</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for item in cart %}
-            {% with product=item.product %}
+    <div class="container">
+        <h1>Your shopping cart</h1>
+        <table class="cart">
+            <thead>
                 <tr>
-                    <td>
-                        <a href="{{ product.get_absolute_url }}">
-                            <img src="{% if product.image %}
-                            {{ product.image.url }}
-                                {% else %}
-                            {% static 'img/no_image.png' %}
-                                {% endif %}"
-                             alt="Product Image"
-                             width="200"
-                             height="200">
-                        </a>
-                    </td>
-                    <td>{{ product.title }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td><a href="{% url 'cart:cart_remove' product.id%}">Remove</a></td>
-                    <td class="num">${{ item.price }}</td>
-                    <td class="num">${{ item.total_price }}</td>
+                    <th>Image</th>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Remove</th>
+                    <th>Unit price</th>
+                    <th>Price</th>
                 </tr>
-            {% endwith %}
-        {% endfor %}
-        <tr class="total">
-            <td>Total</td>
-            <td colspan="4"></td>
-            <td class="num">${{ cart.get_total_price }}</td>
-        </tr>
-        </tbody>
-    </table>
-    <p class="text-right">
-        <a href="{% url 'main:index' %}" class="button light">Continue shopping</a>
-        <a href="#" class="button">Checkout</a>
-    </p>
-<svg preserveAspectRatio="xMidYMid slice" viewBox="10 10 80 80">
-    <defs>
-        <style>
-            @keyframes rotate {
-					 0% {
-                    transform: rotate(0deg);
-                }
-                100% {
-                    transform: rotate(360deg);
-                }
-            }
-            .out-top {
-                animation: rotate 20s linear infinite;
-                transform-origin: 13px 25px;
-            }
-            .in-top {
-                animation: rotate 10s linear infinite;
-                transform-origin: 13px 25px;
-            }
-            .out-bottom {
-                animation: rotate 25s linear infinite;
-                transform-origin: 84px 93px;
-            }
-            .in-bottom {
-                animation: rotate 15s linear infinite;
-                transform-origin: 84px 93px;
-            }
-        </style>
-    </defs>
-    <path fill="#9b5de5" class="out-top" d="M37-5C25.1-14.7,5.7-19.1-9.2-10-28.5,1.8-32.7,31.1-19.8,49c15.5,21.5,52.6,22,67.2,2.3C59.4,35,53.7,8.5,37-5Z"/>
-    <path fill="#f15bb5" class="in-top" d="M20.6,4.1C11.6,1.5-1.9,2.5-8,11.2-16.3,23.1-8.2,45.6,7.4,50S42.1,38.9,41,24.5C40.2,14.1,29.4,6.6,20.6,4.1Z"/>
-    <path fill="#00bbf9" class="out-bottom" d="M105.9,48.6c-12.4-8.2-29.3-4.8-39.4.8-23.4,12.8-37.7,51.9-19.1,74.1s63.9,15.3,76-5.6c7.6-13.3,1.8-31.1-2.3-43.8C117.6,63.3,114.7,54.3,105.9,48.6Z"/>
-    <path fill="#00f5d4" class="in-bottom" d="M102,67.1c-9.6-6.1-22-3.1-29.5,2-15.4,10.7-19.6,37.5-7.6,47.8s35.9,3.9,44.5-12.5C115.5,92.6,113.9,74.6,102,67.1Z"/>
-</svg>
+            </thead>
+            <tbody>
+                {% for item in cart %}
+{% with product=item.product %}
+                        <tr>
+                            <td>
+                                <a href="{{ product.get_absolute_url }}">
+                                    <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'img/no_image.png' %}{% endif %}" alt="Product Image">
+                                </a>
+                            </td>
+                            <td>{{ product.title }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td><a href="{% url 'cart:cart_remove' product.id %}" class="remove-btn">Remove</a></td>
+                            <td class="num">${{ item.price }}</td>
+                            <td class="num">${{ item.total_price }}</td>
+                        </tr>
+                    {% endwith %}
+                {% endfor %}
+                <tr class="total">
+                    <td>Total</td>
+                    <td colspan="4"></td>
+                    <td class="num">${{ cart.get_total_price }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="text-right">
+            <a href="{% url 'main:index' %}" class="button light">Continue shopping</a>
+            <a href="{% url 'orders:order_create' %}" class="button">Checkout</a>
+        </p>
+    </div>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            color: #ccc;
+            background-color: #2b2b2b;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding-top: 60px; /* Отступ сверху для учета фиксированной навигационной панели */
+        }
+        .container {
+            padding-top: 70px;
+        }
+        a {
+            color: #ff7f50;
+            text-decoration: none;
+        }
+        a:hover {
+            color: #ffa07a;
+            text-decoration: underline;
+        }
+        .navbar {
+            background-color: #333;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .navbar-light .navbar-nav .nav-link {
+            color: #ccc;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        .navbar-nav .dropdown-menu {
+            right: 0;
+            left: auto;
+        }
+        .top-menu li a::after {
+            content: '';
+            display: block;
+            width: 100%;
+            background-color: #ccc;
+            height: 1px;
+            transition: all .3s;
+            transform: scale(0);
+        }
+        .top-menu li a:hover::after {
+            transform: scale(1);
+        }
+        section {
+            padding: 50px 0;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            color: #111;
+        }
+        .cart {
+            width: 90%;
+            max-width: 1000px;
+            margin: 100px auto 0 auto;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .cart thead {
+            background-color: #111;
+            color: #fff;
+        }
+        .cart th, .cart td {
+            padding: 15px;
+            text-align: center;
+        }
+        .cart tbody tr {
+            border-bottom: 1px solid #ddd;
+        }
+        .cart tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        .cart img {
+            max-width: 100px;
+            border-radius: 8px;
+        }
+        .cart .num {
+            font-weight: bold;
+        }
+        .total {
+            font-size: 1.2em;
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .button {
+            background-color: #00bbf9;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin: 10px 5px;
+            display: inline-block;
+        }
+        .button:hover {
+            background-color: #007bff;
+        }
+        .button.light {
+            background-color: #f1f1f1;
+            color: #000;
+        }
+        .button.light:hover {
+            background-color: #ddd;
+        }
+    </style>
 {% endblock %}

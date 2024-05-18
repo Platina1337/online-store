@@ -1,0 +1,133 @@
+{% extends "news/base.html" %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'blog/main.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+        <section class="profile-details">
+            <img src="{{ profile.image.url }}" alt="Profile Image">
+            <h2>{{ profile.user.get_full_name }}</h2>
+            <p>{{ profile.email }}</p>
+            <p>{{ profile.address }}</p>
+            <p>{{ profile.city }}, {{ profile.postal_code }}</p>
+            <p>{{ order }}</p>
+
+        </section>
+        <section class="profile-form">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <label for="image">Profile Image</label>
+                <input type="file" name="image" id="image">
+
+                <label for="first_name">First Name</label>
+                <input type="text" name="first_name" id="first_name" value="{{ profile.first_name }}">
+
+                <label for="last_name">Last Name</label>
+                <input type="text" name="last_name" id="last_name" value="{{ profile.last_name }}">
+
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email" value="{{ profile.email }}">
+
+                <label for="address">Address</label>
+                <input type="text" name="address" id="address" value="{{ profile.address }}">
+
+                <label for="city">City</label>
+                <input type="text" name="city" id="city" value="{{ profile.city }}">
+
+                <label for="postal_code">Postal Code</label>
+                <input type="text" name="postal_code" id="postal_code" value="{{ profile.postal_code }}">
+
+                <button type="submit">Save Profile</button>
+            </form>
+        </section>
+    </div>
+ <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            color: #ccc;
+            background-color: #2b2b2b;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .container {
+            padding-top: 70px;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+        }
+        .profile-details, .profile-form {
+            background-color: #444;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+            border-radius: 8px;
+            padding: 15px;
+            transition: all .3s;
+            width: 400px;
+            margin-top: 20px;
+        }
+        .profile-details img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+        .profile-details h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #ff7f50;
+        }
+        .profile-details p {
+            margin: 5px 0;
+            color: #b0b0b0;
+        }
+        .profile-form label {
+            color: #ff7f50;
+            margin-top: 10px;
+            display: block;
+        }
+        .profile-form input, .profile-form select {
+            width: calc(100% - 20px);
+            padding: 8px 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 4px;
+        }
+        .profile-form button {
+            background-color: #ff7f50;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color .3s;
+        }
+        .profile-form button:hover {
+            background-color: #ffa07a;
+        }
+    </style>
+{% endblock %}
+{% block footer %}
+    <footer>
+        <div class="footer-content">
+            <h3>Контакты</h3>
+            <p>Телефон: +79206945165</p>
+            <p>Email: bbd3372005@gmail.com</p>
+            <p>Адрес: улица Трехсвятская д.14</p>
+        </div>
+        <div class="footer-content">
+            <h3>Ссылки</h3>
+            <ul>
+                <li><a href="{% url 'main:index' %}">Главная</a></li>
+                <li><a href="#">О нас</a></li>
+                <li><a href="#">Контакты</a></li>
+                <li><a href="#">Услуги</a></li>
+            </ul>
+        </div>
+    </footer>
+{% endblock %}
