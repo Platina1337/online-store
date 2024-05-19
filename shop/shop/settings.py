@@ -145,3 +145,5 @@ CART_SESSION_ID = 'cart'
 CSRF_FAILURE_VIEW = 'main.views.csrf_failure'  # Замените 'my_app.views.csrf_failure' на путь к вашему представлению обработки ошибок CSRF
 
 
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost//'
+CELERY_RESULT_BACKEND = 'rpc://'

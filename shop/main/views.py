@@ -86,47 +86,16 @@ def like_material(request, material_id):
 
 from rest_framework.decorators import api_view
 
-@api_view(['POST'])
+from .tasks import email_send_message
 def import_contacts_and_send_email(request):
     if request.method == 'POST':
         email = request.POST.get('email')
 
-        api_key = '6tn47mrmxx76i9ooh4mbb8uwezrufedg34xk9kxo'
-        list_id = '1'
-
-        # Добавляем контакт в список Unisender
-        import_url = f'https://api.unisender.com/ru/api/importContacts?format=json&api_key={api_key}&field_names[0]=email&field_names[1]=email_list_ids&data[0][0]={email}&data[0][1]={list_id}'
-        import_response = requests.post(import_url)
-
-        if import_response.status_code == 200:
-            import_data = import_response.json()
-            if 'error' in import_data:
-                return JsonResponse({"error": "Произошла ошибка при добавлении контакта: " + import_data['error']},
-                                    status=400)
-
-            send_email_url = 'https://api.unisender.com/ru/api/sendEmail'
-            send_email_payload = {
-                'api_key': api_key,
-                'sender_name': 'Гоген Солнцев',
-                'sender_email': 'bbd3372005@gmail.com',
-                'subject': 'СКИДКИ 10000%, ВСЕ БЕСПЛАТНО!!!',
-                'body': '<html><body><h1>СКИДОК НЕТ </h1></body></html>',
-                'list_id': list_id,
-                'email': email
-            }
-            send_email_response = requests.post(send_email_url, data=send_email_payload)
-
-            if send_email_response.status_code == 200:
-                send_email_data = send_email_response.json()
-                if 'error' in send_email_data:
-                    return JsonResponse({"error": "Произошла ошибка при отправке письма: " + send_email_data['error']},
-                                        status=400)
-                return redirect('main:index')  # Перенаправление на страницу успеха
-            else:
-                return JsonResponse({"error": "Ошибка при отправке письма."}, status=send_email_response.status_code)
+        if email:
+            email_send_message.delay(email)
+            return redirect('main:index')
         else:
-            return JsonResponse({"error": "Произошла ошибка при добавлении контакта."},
-                                status=import_response.status_code)
+            return JsonResponse({"error": "Email не указан."}, status=400)
     else:
         return JsonResponse({"error": "Метод не поддерживается."}, status=405)
 
