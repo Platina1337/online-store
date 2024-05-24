@@ -170,7 +170,6 @@ class RegistrationView(View):
 
     def get(self, request):
         form = self.form_class()
-        print(request.POST)
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):
@@ -180,38 +179,34 @@ class RegistrationView(View):
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
 
-            # Создание нового пользователя
-            user = User.objects.create_user(username=username, email=email, password=password)
-
-            # Создание профиля для пользователя
+            user = User.objects.create_user(username=username, email=email, password=password, role=True)
             profile = Profile.objects.create(user=user, email=email)
 
-            # Проверим, что профиль успешно создан
             if profile:
                 print(f'Profile created successfully for {username}')
 
-            return redirect('main:login')  # Перенаправление на страницу с успехом
+            return redirect('main:login')
         else:
             print('Form is invalid')
             print(form.errors)
             return render(request, self.template_name, {'form': form})
-
-
 def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            login(request, user)
-            return redirect('main:index')  # Замените 'index' на имя вашего URL-шаблона
-
-        # Обработка неверных учетных данных
-        error_message = 'Invalid username or password'
-        return render(request, 'blog/login.html', {'error_message': error_message})
-
-    return render(request, 'blog/login.html')
-
+            if user.role == True:
+                login(request, user)
+                return redirect('main:index')  # Перенаправление на нужную страницу для роли False
+            else:
+                # Роль True - перенаправляем на другую страницу
+                return redirect('provider:login')  # Замените 'main:some_other_page' на нужный URL
+        else:
+            # Пользователь с указанными учетными данными не найден, перезагрузка страницы
+            return redirect('provider:login')  # Перенаправление на ту же страницу в случае ошибки ввода
+    else:
+        return render(request, 'blog/login.html')
 
 class ViewCatalog(ListView):
     model = BuildingMaterials

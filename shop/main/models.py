@@ -8,7 +8,13 @@ from django.utils.text import slugify
 # Create your models here.
 
 from django.utils.text import slugify
+from django.contrib.auth import get_user_model
+# ...
+# Добавить следующее поле в User динамически
+user_model = get_user_model()
 
+# Добавить поле 'role' в модель User
+user_model.add_to_class('role', models.BooleanField(default=False))
 
 class Category(models.Model):
     name = models.CharField(max_length=128, verbose_name='Название категории')
@@ -27,7 +33,8 @@ class Profile(models.Model):
     address = models.CharField(max_length=255, null=True)
     postal_code = models.CharField(max_length=20, null=True)
     city = models.CharField(max_length=100, null=True)
-
+    passport_number = models.CharField(max_length=6, null=True)
+    passport_series = models.CharField(max_length=4, null=True)
 
     def __str__(self):
         return f'{self.user.username} Profile'

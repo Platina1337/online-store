@@ -16,7 +16,7 @@
     <title>Document</title>
 </head>
 <body>
-<form class="login-form" method="POST" action="{% url 'main:register' %}">
+<form class="login-form" method="POST" action="{% url 'provider:register' %}">
   {% csrf_token %}
   <p class="login-text">
     <span class="fa-stack fa-lg">
@@ -48,6 +48,54 @@
       {% endfor %}
     </ul>
   {% endif %}
+
+
+    <input type="text" class="login-username" required="true" placeholder="First Name" id="first_name" name="first_name" />
+    {% if form.first_name.errors %}
+      <ul class="errorlist">
+        {% for error in form.first_name.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <input type="text" class="login-username" required="true" placeholder="Last Name" id="last_name" name="last_name" />
+    {% if form.last_name.errors %}
+      <ul class="errorlist">
+        {% for error in form.last_name.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <input type="text" class="login-username" required="true" placeholder="City" id="city" name="city" />
+    {% if form.city.errors %}
+      <ul class="errorlist">
+        {% for error in form.city.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  <input type="text" class="login-username" required="true" placeholder="Passport Series" id="passport_series" name="passport_series" />
+    {% if form.passport_series.errors %}
+      <ul class="errorlist">
+        {% for error in form.passport_series.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <input type="text" class="login-username" required="true" placeholder="Passport Number" id="passport_number" name="passport_number" />
+    {% if form.passport_number.errors %}
+      <ul class="errorlist">
+        {% for error in form.passport_number.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+
+
 
   <input type="submit" name="Login" value="Registration" class="login-submit" />
 </form>

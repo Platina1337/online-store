@@ -1,0 +1,58 @@
+{% extends "news/base.html" %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'blog/provider.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Добавь свою анкету</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group mb-3">
+            <label for="id_title">Название</label>
+            {{ form.title }}
+        </div>
+        <div class="form-group mb-3">
+            <label for="id_description">Описание</label>
+            {{ form.description }}
+        </div>
+        <div class="form-group mb-3">
+            <label for="id_image">Картинка</label>
+            {{ form.image }}
+        </div>
+        <div class="form-group mb-3">
+        <label for="id_category">Категория</label>
+        <select class="form-select" id="id_category" name="category">
+            {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
+        </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="id_price">Цена</label>
+            {{ form.price }}
+        </div>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+    </form>
+</div>
+{% endblock content %}
+{% block footer %}
+    <footer>
+        <div class="footer-content">
+            <h3>Контакты</h3>
+            <p>Телефон: +79206945165</p>
+            <p>Email: bbd3372005@gmail.com</p>
+            <p>Адрес: улица Трехсвятская д.14</p>
+        </div>
+        <div class="footer-content">
+            <h3>Ссылки</h3>
+            <ul>
+                <li><a href="{% url 'main:index' %}">Главная</a></li>
+                <li><a href="#">О нас</a></li>
+                <li><a href="#">Контакты</a></li>
+                <li><a href="#">Услуги</a></li>
+            </ul>
+        </div>
+    </footer>
+{% endblock %}
