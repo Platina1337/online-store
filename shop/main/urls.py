@@ -7,6 +7,8 @@ from django.conf.urls.static import static
 urlpatterns = [
 
     path('home/', ViewHome.as_view(), name='home'),
+    path('following/', FollowingListView.as_view(), name='following_list'),
+    path('follow/', user_follow, name='user_follow'),
     path('post/<int:id>/<slug:slug>/', product_detail, name='post-detail'),
     path('import_contacts_and_send_email/', import_contacts_and_send_email, name='import_contacts_and_send_email'),
     path('', ViewIndex.as_view(), name='index'),

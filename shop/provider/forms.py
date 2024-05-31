@@ -1,3 +1,5 @@
+from django.contrib.auth import get_user_model
+
 from .models import *
 from django import forms
 from django.contrib.auth.models import User
@@ -14,6 +16,7 @@ class RegistrationProviderForm(forms.Form):
 
     def clean_username(self):
         username = self.cleaned_data.get('username')
+        User = get_user_model()
         if User.objects.filter(username=username).exists():
             raise forms.ValidationError('This username is already taken.')
         return username
@@ -21,7 +24,7 @@ class RegistrationProviderForm(forms.Form):
 class AddPostForm(forms.ModelForm):
     class Meta:
         model = BuildingMaterials
-        fields = ['title', 'description', 'image', 'price']
+        fields = ['title', 'description', 'image', 'price', 'category']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

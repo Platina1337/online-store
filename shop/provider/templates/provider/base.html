@@ -29,10 +29,19 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0 top-menu">
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'main:index' %}">Home</a>
+                    <a class="nav-link" href="{% url 'main:index' %}">Главная</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'main:сatalog' %}">Catalog</a>
+                    <a class="nav-link" href="{% url 'main:сatalog' %}">Каталог</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'provider:messages' %}">Сообщения</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'provider:list_posts' %}">Ваши Анкеты</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'provider:add' %}">Добавить Анкету</a>
                 </li>
             </ul>
             <ul class="navbar-nav mb-2 mb-lg-0 ms-auto">
@@ -64,13 +73,27 @@
                                         {{ user.username }}
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="dropdown-item" href="#">
+                                        Подписчики {{ followers_count }}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'main:following_list' %}">
+                                        Подписки
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'orders:user_orders' %}">
+                                        Заказы
+                                    </a>
+                                </li>
                             {% endif %}
                             <li><a class="dropdown-item" href="{% url 'main:logout' %}">Выйти</a></li>
                         {% else %}
-                            <li><a class="dropdown-item" href="{% url 'main:login' %}">Авторизация клиента</a></li>
-                            <li><a class="dropdown-item" href="{% url 'main:register' %}">Регистрация клиента</a></li>
-                            <li><a class="dropdown-item" href="{% url 'provider:register' %}">Регистрация поставщика</a></li>
-                            <li><a class="dropdown-item" href="{% url 'provider:login' %}">Авторизация поставщика</a></li>
+                            <li><a class="dropdown-item" href="{% url 'main:login' %}">Авторизация</a></li>
+                            <li><a class="dropdown-item" href="{% url 'main:register' %}">Регистрация</a></li>
+
                         {% endif %}
                     </ul>
                 </li>

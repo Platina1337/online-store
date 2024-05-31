@@ -1,34 +1,39 @@
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django import forms
-from django.contrib.auth.models import User
+import redis
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.views import View
 from typing import Any
-
+from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, DetailView, UpdateView
-from .models import BuildingMaterials, Review, Like, Profile, Category
+from .models import BuildingMaterials, Review, Like, Profile, Category, User, Contact
 from django.views.decorators.http import require_POST
 from cart.forms import CartAddProductForm
 from news.models import Video
 from orders.models import OrderItem
 
+
 def product_detail(request, id, slug):
     product = get_object_or_404(BuildingMaterials, id=id, slug=slug, available=True)
     reviews = Review.objects.filter(post=product)
+    current_user = request.user
+    total_views = r.incr(f'image:{product.id}:views')
+    total_likes = product.likes.count()
+    is_liked = product.likes.filter(id=request.user.id).exists()
 
     # Pagination - Show 4 reviews per page
     paginator = Paginator(reviews, 4)
-    page_number = request.GET.get('page')  # Get the current page number
+    page_number = request.GET.get('page')
     try:
         reviews = paginator.page(page_number)
     except PageNotAnInteger:
-        reviews = paginator.page(1)  # If page is not an integer, deliver first page
+        reviews = paginator.page(1)
     except EmptyPage:
-        reviews = paginator.page(paginator.num_pages)  # If page is out of range, deliver last page
+        reviews = paginator.page(paginator.num_pages)
 
     cart_product_form = CartAddProductForm()
 
@@ -41,7 +46,6 @@ def product_detail(request, id, slug):
                 review.author = request.user
                 review.save()
                 return redirect('main:post-detail', id=id, slug=slug)
-
     else:
         review_form = ReviewForm()
 
@@ -49,7 +53,11 @@ def product_detail(request, id, slug):
         'product': product,
         'cart_product_form': cart_product_form,
         'review_form': review_form,
-        'reviews': reviews,  # Paginated reviews
+        'reviews': reviews,
+        'current_user': current_user,
+        'total_views': total_views,
+        'total_likes': total_likes,
+        'is_liked': is_liked,
     })
 
 
@@ -84,15 +92,18 @@ def like_material(request, material_id):
     # Перенаправляем пользователя обратно на страницу материала
     return HttpResponseRedirect(reverse('main:post-detail', args=[material_id, material.slug]))
 
-from rest_framework.decorators import api_view
 
-from .tasks import email_send_message
+
+from .tasks import email_send_message, logger
+
 def import_contacts_and_send_email(request):
     if request.method == 'POST':
         email = request.POST.get('email')
 
         if email:
+            logger.info(f'Received email: {email}')
             email_send_message.delay(email)
+            logger.info('Task has been sent to Celery')
             return redirect('main:index')
         else:
             return JsonResponse({"error": "Email не указан."}, status=400)
@@ -142,15 +153,21 @@ class ViewIndex(ListView):
         page_objects = paginator.get_page(page_number)
 
         if self.request.user.is_authenticated:
-            user_profile = self.request.user.profile  # Предположим, что у пользователя есть профиль
+            user_profile = self.request.user.profile
             for material in page_objects:
                 material.is_liked = Like.objects.filter(user=user_profile, material=material).exists()
 
         context['post'] = page_objects
         random_objects = list(BuildingMaterials.objects.order_by('?')[:self.paginate_by])
-        context['post'] = random_objects
+        if self.request.user.is_authenticated:
+            for material in random_objects:
+                material.is_liked = Like.objects.filter(user=self.request.user.profile, material=material).exists()
+        context['random_objects'] = random_objects
 
         populars = BuildingMaterials.objects.annotate(like_count=Count('likes')).order_by('-like_count')[:self.paginate_by]
+        if self.request.user.is_authenticated:
+            for material in populars:
+                material.is_liked = Like.objects.filter(user=self.request.user.profile, material=material).exists()
         context['populars'] = populars
 
         return context
@@ -179,6 +196,7 @@ class RegistrationView(View):
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
 
+            User = get_user_model()
             user = User.objects.create_user(username=username, email=email, password=password, role=True)
             profile = Profile.objects.create(user=user, email=email)
 
@@ -347,3 +365,33 @@ class ProfileView(LoginRequiredMixin, UpdateView):
         Order = OrderItem.objects.filter(profile=self.request.user.profile).count()
         context['order'] = Order
         return context
+
+@require_POST
+@login_required
+def user_follow(request):
+    user_id = request.POST.get('id')
+    action = request.POST.get('action')
+    if user_id and action:
+        try:
+            user_to = Profile.objects.get(user__id=user_id)
+            user_from = request.user.profile
+            if action == 'follow':
+                Contact.objects.get_or_create(user_from=user_from, user_to=user_to)
+            else:
+                Contact.objects.filter(user_from=user_from, user_to=user_to).delete()
+            return JsonResponse({'status': 'ok'})
+        except Profile.DoesNotExist:
+            return JsonResponse({'status': 'error'})
+    return JsonResponse({'status': 'error'})
+
+class FollowingListView(LoginRequiredMixin, ListView):
+    model = Profile
+    template_name = 'blog/following_list.html'
+    context_object_name = 'following_list'
+
+    def get_queryset(self):
+        return self.request.user.profile.following.all()
+
+r = redis.Redis(host=settings.REDIS_HOST,
+                port=settings.REDIS_PORT,
+                db=settings.REDIS_DB)

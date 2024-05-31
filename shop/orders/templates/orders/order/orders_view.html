@@ -1,0 +1,27 @@
+{% extends "provider/base.html" %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'blog/provider.css' %}">
+{% endblock %}
+{% block title %}My Orders{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="material-title">Мои Заказы</h2>
+    {% if orders %}
+        <ul class="list-unstyled">
+            {% for order in orders %}
+                <li class="product-card mb-4 p-3">
+                    <h4>Заказ #{{ order.id }} - {{ order.created|date:"F d, Y" }}</h4>
+                    <p><strong>Имя:</strong> {{ order.first_name }} {{ order.last_name }}</p>
+                    <p><strong>Email:</strong> {{ order.email }}</p>
+                    <p><strong>Адрес:</strong> {{ order.address }}, {{ order.city }}, {{ order.postal_code }}</p>
+                    <p><strong>Цена:</strong> {{ order.get_total_cost }} ₽ </p>
+                    <p><strong>Статус:</strong> {% if order.paid %}Оплачен{% else %}Не оплачен{% endif %}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No orders found.</p>
+    {% endif %}
+</div>
+{% endblock %}

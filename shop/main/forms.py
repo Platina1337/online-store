@@ -1,12 +1,12 @@
 from .models import *
 from django import forms
 
-
+from django.contrib.auth import get_user_model
 
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
+from .models import Review, User
 
 class RegistrationForm(forms.Form):
     username = forms.CharField(label='Username', max_length=150)
@@ -15,12 +15,13 @@ class RegistrationForm(forms.Form):
 
     def clean_username(self):
         username = self.cleaned_data.get('username')
+        User = get_user_model()
         if User.objects.filter(username=username).exists():
             raise forms.ValidationError('This username is already taken.')
         return username
 
 from django import forms
-from .models import Review
+
 
 class ReviewForm(forms.ModelForm):
     class Meta:

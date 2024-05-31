@@ -1,0 +1,32 @@
+venv\Scripts\activate
+cd shop
+
+pip install django
+pip install celery
+pip install mysqlclient
+pip install pillow
+pip install requests
+pip install djangorestframework
+pip install redis==4.3.4
+
+docker pull redis
+docker pull rabbitmq
+docker run -it --rm --name redis -p 6379:6379 redis
+
+docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:management
+--запустки реббит, и редис--
+
+venv\Scripts\activate
+cd shop
+docker exec -it redis sh
+redis-cli
+
+venv\Scripts\activate
+cd shop
+import redis
+r = redis.Redis(host='localhost', port=6379, db=0)
+
+venv\Scripts\activate
+cd shop
+celery -A shop worker -l info
+--запустить селери--

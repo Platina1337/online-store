@@ -1,5 +1,8 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
-from .models import OrderItem
+from django.views.generic import ListView
+
+from .models import OrderItem, Order
 from .forms import OrderCreateForm
 from cart.cart import Cart
 from main.models import Profile
@@ -25,3 +28,12 @@ def order_create(request):
         form = OrderCreateForm
     return render(request, 'orders/order/create.html',
                   {'cart': cart, 'form': form})
+
+class UserOrderListView(LoginRequiredMixin, ListView):
+    model = Order
+    template_name = 'orders/order/orders_view.html'
+    context_object_name = 'orders'
+
+    def get_queryset(self):
+        return Order.objects.filter(items__profile=self.request.user.profile).distinct()
+

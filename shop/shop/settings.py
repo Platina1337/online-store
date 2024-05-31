@@ -70,6 +70,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'main.context_processors.followers_count'
             ],
         },
     },
@@ -84,7 +85,7 @@ WSGI_APPLICATION = 'shop.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'buildingmaterialsbd',  # Название вашей базы данных MySQL
+        'NAME': 'materials',  # Название вашей базы данных MySQL
         'USER': 'root',                  # Имя пользователя базы данных
         'PASSWORD': '12345678',                  # Пароль базы данных (оставьте пустым, если нет пароля)
         'HOST': '127.0.0.1',             # Хост базы данных (обычно '127.0.0.1' для локального подключения)
@@ -130,6 +131,12 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your_email@gmail.com'
+EMAIL_HOST_PASSWORD = 'your_password'
 
 
 STATICFILES_DIRS = [
@@ -148,3 +155,13 @@ CSRF_FAILURE_VIEW = 'main.views.csrf_failure'  # Замените 'my_app.views.
 
 CELERY_BROKER_URL = 'amqp://guest:guest@localhost//'
 CELERY_RESULT_BACKEND = 'rpc://'
+
+
+# settings.py
+
+AUTH_USER_MODEL = 'main.user'
+
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
+REDIS_DB = 0
+
