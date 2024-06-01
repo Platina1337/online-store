@@ -75,6 +75,7 @@ class BuildingMaterials(models.Model):
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True)
     likes = models.ManyToManyField(Profile, related_name='liked_materials', through='Like')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='materials')
+    views = models.PositiveIntegerField(default=0, verbose_name='Количество просмотров')
 
     def save(self, *args, **kwargs):
         if not self.slug:

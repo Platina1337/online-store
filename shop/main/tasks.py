@@ -2,6 +2,9 @@ from __future__ import absolute_import, unicode_literals
 import logging
 from celery import shared_task
 from django.core.mail import send_mail
+import redis
+from django.conf import settings
+from .models import BuildingMaterials
 
 logger = logging.getLogger(__name__)
 
@@ -16,3 +19,4 @@ def email_send_message(email):
     except Exception as e:
         logger.error(f'Failed to send email to {email}: {e}')
     return mail_sent
+

@@ -16,16 +16,26 @@ from cart.forms import CartAddProductForm
 from news.models import Video
 from orders.models import OrderItem
 
+r = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=settings.REDIS_DB)
+
 
 def product_detail(request, id, slug):
     product = get_object_or_404(BuildingMaterials, id=id, slug=slug, available=True)
     reviews = Review.objects.filter(post=product)
     current_user = request.user
-    total_views = r.incr(f'image:{product.id}:views')
+
+    # Инкремент количества просмотров в Redis
+    redis_key = f'image:{product.id}:views'
+    total_views = r.incr(redis_key)
+
+    # Обновление количества просмотров в базе данных
+    product.views = total_views
+    product.save(update_fields=['views'])
+
     total_likes = product.likes.count()
     is_liked = product.likes.filter(id=request.user.id).exists()
 
-    # Pagination - Show 4 reviews per page
+    # Пагинация - Показывать 4 отзыва на страницу
     paginator = Paginator(reviews, 4)
     page_number = request.GET.get('page')
     try:
@@ -59,7 +69,6 @@ def product_detail(request, id, slug):
         'total_likes': total_likes,
         'is_liked': is_liked,
     })
-
 
 
 
@@ -392,6 +401,3 @@ class FollowingListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return self.request.user.profile.following.all()
 
-r = redis.Redis(host=settings.REDIS_HOST,
-                port=settings.REDIS_PORT,
-                db=settings.REDIS_DB)

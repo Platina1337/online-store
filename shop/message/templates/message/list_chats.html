@@ -1,0 +1,136 @@
+{% extends "provider/base.html" %}
+{% load static %}
+{% block css %}
+<link rel="stylesheet" href="{% static 'blog/main.css' %}">
+<style>
+    @import 'https://fonts.googleapis.com/css?family=Open+Sans:300,400';
+
+    .content {
+        margin-top: 80px; /* Убедитесь, что карточки отображаются ниже навбара */
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start; /* Перемещаем карточки к левому краю */
+        padding-left: 20px; /* Отступ от левого края */
+    }
+
+    .card {
+        width: 600px; /* Уменьшенная ширина карточки */
+        padding: 20px;
+        border-radius: 3px;
+        background-color: white;
+        box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 20px; /* Расстояние между карточками */
+        height: 200px; /* Увеличенная высота карточки */
+    }
+
+    .card::after {
+        content: '';
+        display: block;
+        width: 300px; /* Полоска шириной 300px */
+        height: 300px;
+        background: cadetblue;
+        position: absolute;
+        left: -100px; /* Положение полоски слева */
+        top: -100px; /* Положение полоски сверху */
+        transform: rotate(45deg); /* Наклон полоски */
+        z-index: 1; /* Полоска на заднем плане */
+    }
+
+    .firstinfo {
+        display: flex;
+        flex-direction: row;
+        position: relative;
+        z-index: 2; /* Контент на переднем плане */
+    }
+
+    .firstinfo img {
+        border-radius: 50%;
+        width: 100px; /* Размер аватарки */
+        height: 100px;
+        margin-right: 20px;
+    }
+
+    .profileinfo {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .profileinfo h1 {
+        font-size: 1.5em;
+        margin: 0;
+    }
+
+    .profileinfo h3 {
+        font-size: 1.2em;
+        color: #009688;
+        font-style: italic;
+        margin: 5px 0;
+    }
+
+    .profileinfo p.bio {
+        padding: 10px 0;
+        color: #5A5A5A;
+        line-height: 1.2;
+    }
+
+    .message-preview {
+        font-size: 14px;
+        color: #5A5A5A;
+        margin-top: 10px;
+    }
+
+    .chat-date {
+        font-size: 12px;
+        color: #888;
+        position: absolute;
+        bottom: 20px; /* Отступ от нижнего края карточки */
+        right: 20px; /* Отступ от правого края карточки */
+        text-align: right;
+        z-index: 2; /* Контент на переднем плане */
+    }
+</style>
+{% endblock css %}
+
+{% block content %}
+<div class="content">
+    {% for chat in chats %}
+    <div class="card">
+        <div class="firstinfo">
+            <a href="{{ chat.get_absolute_url }}">
+                {% if chat.member_from == user_profile %}
+                    <img src="{{ chat.member_to.image.url }}" alt="Avatar">
+                {% else %}
+                    <img src="{{ chat.member_from.image.url }}" alt="Avatar">
+                {% endif %}
+            </a>
+            <div class="profileinfo">
+                <h1>
+                    <a href="{{ chat.get_absolute_url }}">
+                        {% if chat.member_from == user_profile %}
+                            {{ chat.member_to.user.username }}
+                        {% else %}
+                            {{ chat.member_from.user.username }}
+                        {% endif %}
+                    </a>
+                </h1>
+                <p class="message-preview">
+                    {% with messages=chat.message_set.all %}
+                    {% if messages %}
+                        {{ messages.last.message }}
+                    {% else %}
+                        Нет сообщений
+                    {% endif %}
+                    {% endwith %}
+                </p>
+            </div>
+        </div>
+        <p class="chat-date">
+            Начало диалога: {{ chat.created_at|date:"d M Y H:i" }}
+        </p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock content %}

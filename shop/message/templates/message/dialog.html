@@ -1,0 +1,380 @@
+{% extends "provider/base.html" %}
+{% load static %}
+{% block css %}
+<link rel="stylesheet" href="{% static 'blog/main.css' %}">
+<style>
+        /* Переменные */
+        :root {
+            --dark-theme-chat-background: rgba(10, 14, 14, 0.95);
+            --dark-theme-chat-panel-background: #131719;
+            --dark-theme-chat-bubble-background: #14181a;
+            --dark-theme-chat-bubble-active-background: #171a1b;
+            --dark-theme-chat-add-button-background: #212324;
+            --dark-theme-chat-send-button-background: #8147fc;
+            --dark-theme-chat-text-color: #a3a3a3;
+            --dark-theme-chat-options-svg: #a3a3a3;
+        }
+        .chat__conversation-board__message__person__avatar {
+            height: 25px;
+            max-width: 25px; /* Добавлено свойство max-width */
+            overflow: hidden;
+            border-radius: 50%;
+            user-select: none;
+            ms-user-select: none;
+            position: relative;
+        }
+        @mixin centered {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #chat {
+            background: var(--dark-theme-chat-background);
+            max-width: 600px;
+            margin: 25px auto;
+            box-sizing: border-box;
+            padding: 1em;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-icon {
+            position: relative;
+            cursor: pointer;
+
+            svg {
+                stroke: #FFF;
+                fill: #FFF;
+                width: 50%;
+                height: auto;
+                @include centered;
+            }
+        }
+
+        .chat {
+            &__conversation-board {
+                padding: 1em 0 2em;
+                height: calc(100vh - 55px - 2em - 25px * 2 - .5em - 3em);
+                overflow: auto;
+
+                &__message-container.reversed {
+                    flex-direction: row-reverse;
+
+                    .chat__conversation-board__message__bubble {
+                        position: relative;
+
+                        span:not(:last-child) {
+                            margin: 0 0 2em 0;
+                        }
+                    }
+
+                    .chat__conversation-board__message__person {
+                        margin: 0 0 0 1.2em;
+                    }
+
+                    .chat__conversation-board__message__options {
+                        align-self: center;
+                        position: absolute;
+                        left: 0;
+                        display: none;
+                    }
+                }
+
+                &__message-container {
+                    position: relative;
+                    display: flex;
+                    flex-direction: row;
+
+                    &:hover {
+                        .chat__conversation-board__message__options {
+                            display: flex;
+                            align-items: center;
+                        }
+
+                        .option-item:not(:last-child) {
+                            margin: 0 .5em 0 0;
+                        }
+                    }
+
+                    &:not(:last-child) {
+                        margin: 0 0 2em 0;
+                    }
+
+                    &__message__person {
+                        text-align: center;
+                        margin: 0 1.2em 0 0;
+
+                        &__avatar {
+                            /* Уменьшаем размер аватарки */
+                            height: 25px;
+                            width: 25px;
+                            overflow: hidden;
+                            border-radius: 50%;
+                            user-select: none;
+                            ms-user-select: none;
+                            position: relative;
+
+                            &::before {
+                                content: "";
+                                position: absolute;
+                                height: 100%;
+                                width: 100%;
+                            }
+
+                            img {
+                                height: 100%;
+                                width: auto;
+                            }
+                        }
+
+                        &__nickname {
+                            font-size: 9px;
+                            color: #484848;
+                            user-select: none;
+                            display: none;
+                        }
+                    }
+
+                    &__message__context {
+                        max-width: 55%;
+                        align-self: flex-end;
+                    }
+
+                    &__message__options {
+                        align-self: center;
+                        position: absolute;
+                        right: 0;
+                        display: none;
+
+                        .option-item {
+                            border: 0;
+                            background: 0;
+                            padding: 0;
+                            margin: 0;
+                            height: 16px;
+                            width: 16px;
+                            outline: none;
+
+                            .emoji-button {
+                                svg {
+                                    stroke: var(--dark-theme-chat-options-svg);
+                                    fill: transparent;
+                                    width: 100%;
+                                }
+                            }
+
+                            .more-button {
+                                svg {
+                                    stroke: var(--dark-theme-chat-options-svg);
+                                    fill: transparent;
+                                    width: 100%;
+                                }
+                            }
+                        }
+                    }
+
+                    &__message__bubble {
+                        span {
+                            width: fit-content;
+                            display: inline-table;
+                            word-wrap: break-word;
+                            background: var(--dark-theme-chat-bubble-background);
+                            font-size: 13px;
+                            color: var(--dark-theme-chat-text-color);
+                            padding: .5em .8em;
+                            line-height: 1.5;
+                            border-radius: 6px;
+                            font-family: 'Lato', sans-serif;
+
+                            &:not(:last-child) {
+                                margin: 0 0 .3em;
+                            }
+                        }
+
+                        &:active {
+                            background: var(--dark-theme-chat-bubble-active-background);
+                        }
+                    }
+                }
+
+                &__conversation-panel {
+                    background: var(--dark-theme-chat-panel-background);
+                    border-radius: 12px;
+                    padding: 0 1em;
+                    height: 55px;
+                    margin: .5em 0 0;
+
+                    &__container {
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        height: 100%;
+
+                        .panel-item:not(:last-child) {
+                            margin: 0 1em 0 0;
+                        }
+
+                        &__button {
+                            background: grey;
+                            height: 20px;
+                            width: 30px;
+                            border: 0;
+                            padding: 0;
+                            outline: none;
+                            cursor: pointer;
+                        }
+
+                        .add-file-button {
+                            height: 23px;
+                            min-width: 23px;
+                            width: 23px;
+                            background: var(--dark-theme-chat-add-button-background);
+                            border-radius: 50%;
+
+                            svg {
+                                width: 70%;
+                                stroke: #54575c;
+                            }
+                        }
+
+                        .emoji-button {
+                            height: 18px;
+                            min-width: 18px;
+                            width: 18px;
+
+                            svg {
+                                stroke: var(--dark-theme-chat-options-svg);
+                                fill: var(--dark-theme-chat-options-svg);
+                            }
+                        }
+
+                        .send-message-button {
+                            height: 36px;
+                            min-width: 36px;
+                            width: 36px;
+                            background: var(--dark-theme-chat-send-button-background);
+                            border-radius: 50%;
+
+                            svg {
+                                width: 55%;
+                                stroke: #ffffff;
+                                fill: transparent;
+                            }
+                        }
+
+                        .panel-item--input {
+                            flex: 1;
+                            position: relative;
+
+                            &::after {
+                                content: "";
+                                position: absolute;
+                                height: 2px;
+                                width: calc(100% - 15px);
+                                bottom: -8px;
+                                left: 0;
+                            }
+
+                            &__input {
+                                width: 100%;
+                                height: 30px; /* Делаем поле ввода длинной полоской */
+                                outline: none;
+                                border: none;
+                                padding: .5em 0;
+                                background: transparent;
+                                color: var(--dark-theme-chat-text-color);
+                                resize: none;
+
+                                &::placeholder {
+                                    color: var(--dark-theme-chat-text-color);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div id="chat" class="--dark-theme">
+    <div class="chat__conversation-board">
+        {% if chat %}
+            {% for message in chat.message_set.all %}
+                <div class="chat__conversation-board__message-container {% if message.author == user_profile %}reversed{% endif %}">
+                    <div class="chat__conversation-board__message__person">
+                        <div class="chat__conversation-board__message__person__avatar">
+                            <img src="{{ message.author.image.url }}" alt="{{ message.author.user.username }}">
+                        </div>
+                        <span class="chat__conversation-board__message__person__nickname">{{ message.author.user.profile.first_name }} {{ message.author.user.profile.last_name }}</span>
+                    </div>
+                    <div class="chat__conversation-board__message__context">
+                        <div class="chat__conversation-board__message__bubble">
+                            <span>{{ message.message }}</span>
+                        </div>
+                    </div>
+                    <div class="chat__conversation-board__message__options">
+                        <button class="btn-icon chat__conversation-board__message__option-button option-item emoji-button">
+                            <svg class="feather feather-smile sc-dnqmqq jxshSx" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                                <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                                <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                            </svg>
+                        </button>
+                        <button class="btn-icon chat__conversation-board__message__option-button option-item more-button">
+                            <svg class="feather feather-more-horizontal sc-dnqmqq jxshSx" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="1"></circle>
+                                <circle cx="19" cy="12" r="1"></circle>
+                                <circle cx="5" y="12" r="1"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No messages yet.</p>
+        {% endif %}
+    </div>
+    <div class="chat__conversation-panel">
+        <div class="chat__conversation-panel__container">
+            <form method="post" class="chat__conversation-panel__form">
+                {% csrf_token %}
+                <div class="panel-item panel-item--input">
+                    <input type="text" name="message" class="panel-item--input__input" placeholder="Type your message here...">
+                </div>
+                <button type="submit" class="chat__conversation-panel__button panel-item btn-icon send-message-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-reactid="1036">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block footer %}
+<footer>
+    <div class="footer-content">
+        <h3>Контакты</h3>
+        <p>Телефон: +79206945165</p>
+        <p>Email: bbd3372005@gmail.com</p>
+        <p>Адрес: улица Трехсвятская д.14</p>
+    </div>
+    <div class="footer-content">
+        <h3>Ссылки</h3>
+        <ul>
+            <li><a href="{% url 'main:index' %}">Главная</a></li>
+            <li><a href="#">О нас</a></li>
+            <li><a href="#">Контакты</a></li>
+            <li><a href="#">Услуги</a></li>
+        </ul>
+    </div>
+</footer>
+{% endblock %}

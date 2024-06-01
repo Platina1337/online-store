@@ -55,9 +55,12 @@
                                     <i class="fas fa-shopping-cart"></i> Вы не можете добавить свой продукт в корзину
                                 </button>
                             {% endif %}
-                            <button type="button" class="btn btn-success ml-2 mt-3">
+                            <form method="post" action="{% url 'message:create_dialog' product.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success ml-2 mt-3">
                                 <i class="fas fa-envelope"></i> Написать
                             </button>
+                            </form>
                         </div>
                     </div>
                 </div>
