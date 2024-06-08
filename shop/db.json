@@ -1,0 +1,389 @@
+To move the accordion for the categories to the bottom of the catalog items and integrate it smoothly into the design of your site, we need to adjust both the HTML structure and the CSS styling. Here's how you can achieve this:
+
+1. **HTML Structure:** Move the accordion code block to the bottom of the catalog items.
+2. **CSS Styling:** Ensure that the accordion blends well with the rest of the site's design.
+
+### Modified HTML
+
+Move the accordion code block to the bottom of the catalog items. Here’s the updated HTML structure:
+
+```html
+<div class="container">
+    <div class="row">
+        {% for material in materials %}
+            <div class="col-lg-4 col-md-6 mb-3">
+                <div class="product-card">
+                    <div class="product-thumb">
+                        <a href="{{ material.get_absolute_url }}">
+                            <img src="{{ material.image.url }}" alt="" class="img-fluid rounded" style="max-width: 100%;">
+                        </a>
+                    </div>
+                    <div class="product-details">
+                        <h4><a href="{{ material.get_absolute_url }}">{{ material.title }}</a></h4>
+                        <p>{{ material.description }}</p>
+                        <div class="product-bottom-details d-flex justify-content-between">
+                            <div class="product-price">{{ material.price }}</div>
+                            <div class="product-links">
+                                {% if material.is_liked %}
+                                    <a href="#" class="liked"><i class="fas fa-heart"></i></a>
+                                {% else %}
+                                    <a href="{% url 'main:like_material' material.id %}"><i class="far fa-heart"></i></a>
+                                {% endif %}
+                                <span class="like-count">{{ material.like_count }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p>No materials found.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+        <nav aria-label="Page navigation" class="my-4">
+            <ul class="pagination justify-content-center">
+                {% if materials.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.liked_posts %}&liked_posts=on{% endif %}">Первая</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ materials.previous_page_number }}{% if request.GET.liked_posts %}&liked_posts=on{% endif %}">Предыдущая</a>
+                    </li>
+                {% endif %}
+
+                {% for num in materials.paginator.page_range %}
+                    {% if materials.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if request.GET.liked_posts %}&liked_posts=on{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if materials.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ materials.next_page_number }}{% if request.GET.liked_posts %}&liked_posts=on{% endif %}">Следующая</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ materials.paginator.num_pages }}{% if request.GET.liked_posts %}&liked_posts=on{% endif %}">Последняя</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+
+    <!-- Accordion for categories -->
+    <div class="accordion" id="accordionExample">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCategories" aria-expanded="true" aria-controls="collapseCategories">
+                    Категории
+                </button>
+            </h2>
+            <div id="collapseCategories" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                    {% for category in categories %}
+                        <a href="/catalog/{{ category.url }}/" class="category-link" data-category="{{ category.name }}">{{ category.name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+```
+
+### CSS Styling
+
+Ensure that the accordion fits well with the overall design. Here’s the CSS to style it:
+
+```css
+body {
+    font-family: 'Roboto', sans-serif;
+    color: #ccc;
+    background-color: #2b2b2b;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    padding-top: 70px;
+}
+
+a {
+    color: #ff7f50;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #ffa07a;
+    text-decoration: underline;
+}
+
+.navbar {
+    background-color: #333;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.navbar-light .navbar-nav .nav-link {
+    color: #ccc;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.navbar-nav .dropdown-menu {
+    right: 0;
+    left: auto;
+}
+
+.top-menu li a::after {
+    content: '';
+    display: block;
+    width: 100%;
+    background-color: #ccc;
+    height: 1px;
+    transition: all .3s;
+    transform: scale(0);
+}
+
+.top-menu li a:hover::after {
+    transform: scale(1);
+}
+
+section {
+    padding: 50px 0;
+}
+
+.product-card {
+    background-color: #444;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+    border-radius: 8px;
+    padding: 15px;
+    transition: all .3s;
+}
+
+.product-card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.product-thumb a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    padding: 20px;
+}
+
+.product-thumb img {
+    width: 100%;
+    height: auto;
+    max-height: 150px;
+    object-fit: cover;
+}
+
+.product-details {
+    padding: 20px;
+}
+
+.product-details h4 {
+    margin-top: 0;
+    font-size: 18px;
+    font-family: 'Playfair Display', serif;
+    color: #ff7f50;
+}
+
+.product-details h4 a {
+    font-weight: 500;
+    display: block;
+    height: 60px;
+    overflow: hidden;
+    color: white; /* Change the color to white */
+}
+
+.product-details p {
+    font-size: 15px;
+    margin-bottom: 10px;
+    color: #b0b0b0;
+    height: 85px;
+    overflow: hidden;
+}
+
+.product-bottom-details {
+    overflow: hidden;
+    border-top: 1px solid #555;
+    padding-top: 20px;
+    margin-top: 10px;
+}
+
+.product-price {
+    font-size: 18px;
+    color: red; /* Change the color to red */
+    font-weight: bold;
+}
+
+.product-price small {
+    color: #999;
+    font-weight: 400;
+    text-decoration: line-through;
+    margin-right: 5px;
+}
+
+.product-links a {
+    font-size: 20px;
+    margin-left: 10px;
+    color: #ccc;
+}
+
+.product-links a:hover {
+    color: #ff7f50;
+}
+
+footer {
+    background-color: #333;
+    color: #fff;
+    padding: 20px 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    margin-top: auto;
+}
+
+.footer-content {
+    margin: 0 20px;
+}
+
+.footer-content h3 {
+    margin-bottom: 10px;
+    font-family: 'Playfair Display', serif;
+}
+
+.footer-content p {
+    margin: 5px 0;
+}
+
+.footer-content ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.footer-content ul li {
+    margin-bottom: 5px;
+}
+
+.footer-content ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.footer-content ul li a:hover {
+    text-decoration: underline;
+}
+
+.footer-content form input[type="email"] {
+    width: 200px;
+    padding: 5px;
+    margin-bottom: 5px;
+}
+
+.footer-content form button {
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.footer-content form button:hover {
+    background-color: #45a049;
+}
+
+.navbar-nav .nav-item form {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-nav .nav-item form:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.avatar {
+    width: 40px;
+    height
+
+: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.mb-3 {
+    margin-bottom: 1rem;
+}
+
+.btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn:hover {
+    background-color: #45a049;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #4CAF50;
+    border-color: #4CAF50;
+}
+
+.pagination .page-link {
+    color: #4CAF50;
+}
+
+.pagination .page-link:hover {
+    background-color: #45a049;
+    border-color: #45a049;
+    color: white;
+}
+
+/* Custom styles for the accordion */
+.accordion-button {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.accordion-button:hover {
+    background-color: #45a049;
+}
+
+.accordion-body {
+    background-color: #333;
+    color: #fff;
+}
+
+.accordion-item {
+    border: 1px solid #4CAF50;
+}
+
+.accordion-item .category-link {
+    display: block;
+    padding: 10px 15px;
+    color: #fff;
+    text-decoration: none;
+}
+
+.accordion-item .category-link:hover {
+    background-color: #4CAF50;
+    color: #fff;
+}
+```
+
+By implementing these changes, the accordion for categories will be moved to the bottom of the catalog items, and its design will be consistent with the rest of the page. Adjust the styling as necessary to fit your specific design needs.

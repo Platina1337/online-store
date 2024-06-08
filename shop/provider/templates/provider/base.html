@@ -34,15 +34,21 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'main:сatalog' %}">Каталог</a>
                 </li>
+                {% if user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'message:list_chats' %}">Сообщения</a>
                 </li>
+                {% endif %}
+                {% if user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'provider:list_posts' %}">Ваши Анкеты</a>
                 </li>
+                {% endif %}
+                {% if user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'provider:add' %}">Добавить Анкету</a>
                 </li>
+                {% endif %}
             </ul>
             <ul class="navbar-nav mb-2 mb-lg-0 ms-auto">
                 {% if is_catalog_page %}
