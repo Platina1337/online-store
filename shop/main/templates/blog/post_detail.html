@@ -27,7 +27,7 @@
                         <div class="product-details">
                             <h2>{{ product.title }}</h2>
                             <p>{{ product.description }}</p>
-                            <p class="price">${{ product.price }}</p>
+                            <p class="price">₽{{ product.price }}</p>
                             <div class="author-info d-flex align-items-center">
                                 <img src="{{ product.author.image.url }}" alt="{{ product.author.user.username }}" class="avatar mr-2">
                                 <span>Author: {{ product.author.user.username }}</span>
